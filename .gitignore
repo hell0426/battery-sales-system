@@ -1,0 +1,17 @@
+# --- Java/Spring Boot 忽略项 ---
+backend/target/
+backend/.idea/
+backend/*.iml
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+
+# --- Vue/Node 忽略项 (超级重要，否则Git会崩溃) ---
+frontend/node_modules/
+frontend/dist/
+frontend/.vscode/
+frontend/*.log
+
+# --- 系统忽略项 ---
+.DS_Store
+Thumbs.db
