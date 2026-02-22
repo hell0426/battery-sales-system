@@ -1,0 +1,37 @@
+# 1. 服务器端口
+server:
+  port: 8080
+
+spring:
+  # 2. 数据库连接 (核心)
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: root
+    password: 123456
+    url: jdbc:mysql://localhost:3306/battery_sales?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=true&serverTimezone=GMT%2B8
+
+
+  # 3. 日期格式化 (非常重要！为了让前端显示的日期正常)
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+  # 4. 文件上传限制 (为以后传图片做准备)
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# 5. MyBatis-Plus 配置
+mybatis-plus:
+  configuration:
+    # 打印 SQL 日志 (调试神器)
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    # 开启驼峰命名
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 逻辑删除 (1删, 0不删)
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
