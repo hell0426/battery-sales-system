@@ -56,7 +56,7 @@ public class CodeGenerator{
                     .templateEngine(new FreemarkerTemplateEngine()) // 使用 Freemarker 引擎
                     .execute();
 
-            System.out.println("======== 代码生成成功！快去左侧项目栏看看吧 ========");
+            System.out.println("======== 代码生成成功！ ========");
         } catch (Exception e) {
             System.out.println("======== 代码生成失败，请检查数据库配置 ========");
             e.printStackTrace();
