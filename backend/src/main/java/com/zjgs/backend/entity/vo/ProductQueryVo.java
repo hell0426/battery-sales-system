@@ -1,4 +1,4 @@
-package com.zjgs.backend.entity.Vo;
+package com.zjgs.backend.entity.vo;
 
 import lombok.Data;
 
