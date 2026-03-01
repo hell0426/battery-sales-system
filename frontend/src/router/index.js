@@ -6,10 +6,15 @@ const router = createRouter({
   routes:[
     {
       path: '/',
+      redirect: '/dashboard', // 改成默认跳到仪表盘
       name: 'Layout',
       component: Layout,
-      redirect: '/product', // 默认打开就跳到电瓶库存页
       children:[
+        {
+          path: '/dashboard',
+          name: 'Dashboard',
+          component: () => import('../views/Dashboard.vue')
+        },
         {
           path: '/product',
           name: 'Product',
@@ -25,6 +30,12 @@ const router = createRouter({
           name: 'Sales',
           component: () => import('../views/Sales.vue')
         },
+        {
+          path: '/settlement',
+          name: 'Settlement',
+          component: () => import('../views/Settlement.vue')
+        },
+        
       ]
     }
   ]
