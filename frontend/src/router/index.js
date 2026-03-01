@@ -14,6 +14,11 @@ const router = createRouter({
           path: '/product',
           name: 'Product',
           component: () => import('../views/Product.vue') // 懒加载我们的电瓶页面
+        },
+        {
+          path: '/customer',
+          name: 'Customer',
+          component: () => import('../views/Customer.vue')
         }
       ]
     }
