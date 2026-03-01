@@ -3,13 +3,21 @@ import Layout from '../layout/Layout.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
-  routes:[
+  routes: [
+    // 1. 登录页 (单独的路由，不套在 Layout 里)
+    {
+      path: '/login',
+      name: 'Login',
+      component: () => import('../views/Login.vue')
+    },
+    
+    // 2. 主框架
     {
       path: '/',
-      redirect: '/dashboard', // 改成默认跳到仪表盘
       name: 'Layout',
       component: Layout,
-      children:[
+      redirect: '/dashboard',
+      children: [
         {
           path: '/dashboard',
           name: 'Dashboard',
@@ -18,12 +26,7 @@ const router = createRouter({
         {
           path: '/product',
           name: 'Product',
-          component: () => import('../views/Product.vue') // 懒加载我们的电瓶页面
-        },
-        {
-          path: '/customer',
-          name: 'Customer',
-          component: () => import('../views/Customer.vue')
+          component: () => import('../views/Product.vue')
         },
         {
           path: '/sales',
@@ -31,14 +34,28 @@ const router = createRouter({
           component: () => import('../views/Sales.vue')
         },
         {
+          path: '/customer',
+          name: 'Customer',
+          component: () => import('../views/Customer.vue')
+        },
+        {
           path: '/settlement',
           name: 'Settlement',
           component: () => import('../views/Settlement.vue')
-        },
-        
+        }
       ]
     }
   ]
+})
+
+// 简单路由守卫：没登录跳回登录页 (简单模拟)
+router.beforeEach((to, from, next) => {
+  // 如果去的是登录页，直接放行
+  if (to.path === '/login') return next()
+  
+  // 这里为了毕设演示简单，我们就不做复杂的 Token 校验了
+  // 直接放行，默认跳到登录页
+  next() 
 })
 
 export default router
