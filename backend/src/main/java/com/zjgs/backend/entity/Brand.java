@@ -1,0 +1,40 @@
+package com.zjgs.backend.entity;
+
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.io.Serializable;
+
+/**
+ * <p>
+ * 
+ * </p>
+ *
+ * @author Luke
+ * @since 2026-04-22
+ */
+@Getter
+@Setter
+@ToString
+@TableName("brand")
+@Schema(name = "Brand", description = "")
+public class Brand implements Serializable {
+
+    private static final long serialVersionUID = 1L;
+
+    @TableId(value = "id", type = IdType.AUTO)
+    private Integer id;
+
+    /**
+     * 品牌名称
+     */
+    @TableField("name")
+    @Schema(description = "品牌名称")
+    private String name;
+}

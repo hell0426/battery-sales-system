@@ -4,8 +4,10 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjgs.backend.common.utils.RespBean;
 import com.zjgs.backend.entity.Customer;
+import com.zjgs.backend.entity.Orders;
 import com.zjgs.backend.entity.vo.CustomerQueryVo;
 import com.zjgs.backend.service.ICustomerService;
+import com.zjgs.backend.service.IOrdersService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,9 @@ public class CustomerController {
 
     @Autowired
     private ICustomerService customerService;
+    @Autowired
+    private IOrdersService ordersService;
+
 
     // 1. 分页查询
     @Operation(summary = "分页查询客户")
@@ -67,6 +72,10 @@ public class CustomerController {
     @Operation(summary = "删除客户")
     @DeleteMapping("/delete/{id}")
     public RespBean delete(@PathVariable Integer id) {
+        long orderCount = ordersService.count(new LambdaQueryWrapper<Orders>().eq(Orders::getCustomerId, id));
+        if (orderCount > 0) {
+            return RespBean.err().msg("该客户已有订单，为了账目安全，不允许删除！");
+        }
         if(customerService.removeById(id)) {
             return RespBean.ok().msg("删除成功");
         }
