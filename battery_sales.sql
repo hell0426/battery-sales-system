@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 23/04/2026 12:26:33
+ Date: 23/04/2026 18:21:07
 */
 
 SET NAMES utf8mb4;
@@ -30,7 +30,7 @@ CREATE TABLE `brand`  (
 -- ----------------------------
 -- Records of brand
 -- ----------------------------
-INSERT INTO `brand` VALUES (1, '风帆');
+INSERT INTO `brand` VALUES (1, '风帆F');
 INSERT INTO `brand` VALUES (2, '骆驼 (Camel)');
 INSERT INTO `brand` VALUES (3, '瓦尔塔 (Varta)');
 INSERT INTO `brand` VALUES (4, '天能 (Tianneng)');
@@ -49,7 +49,7 @@ CREATE TABLE `customer`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NULL DEFAULT 0 COMMENT '逻辑删除(1:已删, 0:未删)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户信息表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 5 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '客户信息表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of customer
@@ -57,6 +57,7 @@ CREATE TABLE `customer`  (
 INSERT INTO `customer` VALUES (1, '京东养车', '123456789', 'shop', '2026-03-01 21:44:01', '2026-03-01 21:44:01', 0);
 INSERT INTO `customer` VALUES (2, '途虎养车', '456789123', 'shop', '2026-03-01 21:44:01', '2026-03-01 21:44:01', 0);
 INSERT INTO `customer` VALUES (3, '11', '11', 'individual', '2026-04-21 18:07:37', '2026-04-21 18:07:41', 1);
+INSERT INTO `customer` VALUES (4, '小李', '123456789', 'individual', '2026-04-23 16:04:16', '2026-04-23 16:04:16', 0);
 
 -- ----------------------------
 -- Table structure for order_item
@@ -71,7 +72,7 @@ CREATE TABLE `order_item`  (
   `price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '成交单价',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of order_item
@@ -82,6 +83,9 @@ INSERT INTO `order_item` VALUES (3, 3, 2, '骆驼 - 6-QW-45', 2, 300.00, '2026-0
 INSERT INTO `order_item` VALUES (4, 4, 3, '风帆 - 6-QW-45', 3, 450.00, '2026-04-21 11:20:20');
 INSERT INTO `order_item` VALUES (5, 5, 2, '骆驼 - 6-QW-45', 4, 300.00, '2026-04-21 18:07:25');
 INSERT INTO `order_item` VALUES (6, 6, 1, '风帆 (Fengfan) - 6-QW-45(390)-L', 3, 200.00, '2026-04-23 12:10:04');
+INSERT INTO `order_item` VALUES (7, 7, 2, '瓦尔塔 (Varta) - L2-400', 2, 350.00, '2026-04-23 15:44:14');
+INSERT INTO `order_item` VALUES (8, 8, 2, '瓦尔塔 (Varta) - L2-400', 3, 350.00, '2026-04-23 15:44:35');
+INSERT INTO `order_item` VALUES (9, 9, 2, '瓦尔塔 (Varta) - L2-400', 1, 350.00, '2026-04-23 16:04:28');
 
 -- ----------------------------
 -- Table structure for orders
@@ -96,7 +100,7 @@ CREATE TABLE `orders`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NULL DEFAULT 0 COMMENT '逻辑删除(1:已删, 0:未删)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 7 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 10 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of orders
@@ -106,7 +110,10 @@ INSERT INTO `orders` VALUES (2, 1, 900.00, 'paid', '2026-03-01 22:17:51', '2026-
 INSERT INTO `orders` VALUES (3, 2, 600.00, 'paid', '2026-04-21 11:00:20', '2026-04-21 11:00:20', 0);
 INSERT INTO `orders` VALUES (4, 2, 1350.00, 'paid', '2026-04-21 11:20:20', '2026-04-21 11:20:20', 0);
 INSERT INTO `orders` VALUES (5, 2, 1200.00, 'paid', '2026-04-21 18:07:25', '2026-04-21 18:07:25', 0);
-INSERT INTO `orders` VALUES (6, 2, 600.00, 'debt', '2026-04-23 12:10:04', '2026-04-23 12:10:04', 0);
+INSERT INTO `orders` VALUES (6, 2, 600.00, 'paid', '2026-04-23 12:10:04', '2026-04-23 12:10:04', 0);
+INSERT INTO `orders` VALUES (7, 1, 700.00, 'debt', '2026-04-23 15:44:14', '2026-04-23 15:44:14', 0);
+INSERT INTO `orders` VALUES (8, 2, 1050.00, 'debt', '2026-04-23 15:44:35', '2026-04-23 15:44:35', 0);
+INSERT INTO `orders` VALUES (9, 4, 350.00, 'paid', '2026-04-23 16:04:28', '2026-04-23 16:04:28', 0);
 
 -- ----------------------------
 -- Table structure for product
@@ -114,8 +121,6 @@ INSERT INTO `orders` VALUES (6, 2, 600.00, 'debt', '2026-04-23 12:10:04', '2026-
 DROP TABLE IF EXISTS `product`;
 CREATE TABLE `product`  (
   `id` int NOT NULL AUTO_INCREMENT COMMENT '主键ID',
-  `brand` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '品牌 (风帆/骆驼)',
-  `model` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '型号 (6-QW-45)',
   `cost_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '进价',
   `selling_price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '售价',
   `stock` int NULL DEFAULT 0 COMMENT '库存数量',
@@ -129,8 +134,8 @@ CREATE TABLE `product`  (
 -- ----------------------------
 -- Records of product
 -- ----------------------------
-INSERT INTO `product` VALUES (1, '风帆 (Fengfan)', '6-QW-45(390)-L', 100.00, 200.00, 17, '2026-04-23 11:50:15', '2026-04-23 11:50:15', 0, NULL);
-INSERT INTO `product` VALUES (2, '瓦尔塔 (Varta)', 'L2-400', 300.00, 350.00, 10, '2026-04-23 12:09:43', '2026-04-23 12:09:43', 0, NULL);
+INSERT INTO `product` VALUES (1, 100.00, 200.00, 20, '2026-04-23 18:14:54', '2026-04-23 18:14:54', 0, 3);
+INSERT INTO `product` VALUES (2, 150.00, 200.00, 20, '2026-04-23 18:15:16', '2026-04-23 18:15:16', 0, 1);
 
 -- ----------------------------
 -- Table structure for product_model
