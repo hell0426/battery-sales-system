@@ -1,142 +1,249 @@
 <template>
   <div class="dashboard-container">
-
-    <!-- 1. 数据卡片区 -->
-    <el-row :gutter="20" class="card-row">
-      <el-col :span="8">
-        <el-card shadow="hover" class="data-card sales-card">
-          <div class="card-header">
-            <span>💰 总销售额 (已入账)</span>
-          </div>
-          <div class="card-num">¥ {{ statData.totalSales }}</div>
+    <!-- 1. 顶部统计卡片 -->
+    <el-row :gutter="20">
+      <el-col :span="6">
+        <el-card
+          shadow="hover"
+          class="data-card today-card"
+          @click="$router.push('/sales')"
+        >
+          <div class="card-label">☀️ 今日销售额 (去开单)</div>
+          <div class="card-value">¥ {{ statData.todaySales }}</div>
         </el-card>
       </el-col>
-      <el-col :span="8">
-        <el-card shadow="hover" class="data-card debt-card">
-          <div class="card-header">
-            <span>📝 待收欠款 (挂账)</span>
-          </div>
-          <div class="card-num">¥ {{ statData.totalDebt }}</div>
+      <el-col :span="6">
+        <el-card
+          shadow="hover"
+          class="data-card sales-card"
+          @click="$router.push('/settlement')"
+        >
+          <div class="card-label">💰 累计已收金额 (去对账)</div>
+          <div class="card-value">¥ {{ statData.totalSales }}</div>
         </el-card>
       </el-col>
-      <el-col :span="8">
-        <el-card shadow="hover" class="data-card stock-card">
-          <div class="card-header">
-            <span>🚨 库存预警商品</span>
-          </div>
-          <div class="card-num">{{ statData.lowStockCount }} <span style="font-size:14px">种</span></div>
+      <el-col :span="6">
+        <el-card
+          shadow="hover"
+          class="data-card debt-card"
+          @click="$router.push('/settlement')"
+        >
+          <div class="card-label">📝 待收挂账总额 (去催款)</div>
+          <div class="card-value">¥ {{ statData.totalDebt }}</div>
         </el-card>
       </el-col>
-    </el-row>
-
-    <!-- 2. 图表区 -->
-    <el-row :gutter="20" style="margin-top: 20px;">
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <template #header><span>📊 电瓶品牌库存占比</span></template>
-          <!-- ECharts 容器 -->
-          <div id="pieChart" style="height: 350px;"></div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card shadow="hover">
-          <template #header><span>📈 快捷功能入口</span></template>
-          <div class="quick-entry">
-            <el-button type="primary" size="large" icon="ShoppingCart" @click="$router.push('/sales')">去开单</el-button>
-            <el-button type="success" size="large" icon="Box" @click="$router.push('/product')">查库存</el-button>
-            <el-button type="warning" size="large" icon="Notebook" @click="$router.push('/settlement')">查欠账</el-button>
-          </div>
-          <div style="margin-top: 20px; color: #999">
-            <p>系统运行状态：正常</p>
-            <p>当前时间：{{ new Date().toLocaleString() }}</p>
-          </div>
+      <el-col :span="6">
+        <el-card
+          shadow="hover"
+          class="data-card warn-card"
+          @click="$router.push('/product')"
+        >
+          <div class="card-label">🚨 库存预警型号 (去补货)</div>
+          <div class="card-value">{{ statData.lowStockCount }} <small>种</small></div>
         </el-card>
       </el-col>
     </el-row>
 
+    <!-- 2. 中间大图表：销售趋势 -->
+    <el-row :gutter="20" style="margin-top: 20px">
+      <el-col :span="24">
+        <el-card shadow="hover">
+          <template #header>
+            <div class="chart-header">
+              <span class="header-title">📈 销售额趋势分析</span>
+              <el-radio-group v-model="trendType" size="small" @change="renderTrendChart">
+                <el-radio-button label="month">最近30天</el-radio-button>
+                <el-radio-button label="year">年度月份</el-radio-button>
+              </el-radio-group>
+            </div>
+          </template>
+          <div id="trendChart" style="height: 350px"></div>
+        </el-card>
+      </el-col>
+    </el-row>
+
+    <!-- 3. 底部对比图表 -->
+    <el-row :gutter="20" style="margin-top: 20px">
+      <el-col :span="12">
+        <el-card shadow="hover">
+          <template #header
+            ><span class="header-title">🏆 热门型号销量排行 (TOP 5)</span></template
+          >
+          <div id="rankingChart" style="height: 300px"></div>
+        </el-card>
+      </el-col>
+      <el-col :span="12">
+        <el-card shadow="hover">
+          <template #header><span class="header-title">📊 业务构成分析</span></template>
+          <div class="pie-group">
+            <div id="customerPie" style="width: 50%; height: 300px"></div>
+            <div id="stockPie" style="width: 50%; height: 300px"></div>
+          </div>
+        </el-card>
+      </el-col>
+    </el-row>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, reactive } from 'vue'
-import * as echarts from 'echarts'
-import { getStatData } from '@/api/stat'
+import { ref, reactive, onMounted } from "vue";
+import * as echarts from "echarts";
+import { getStatData } from "@/api/stat";
 
 const statData = reactive({
+  todaySales: 0,
   totalSales: 0,
   totalDebt: 0,
-  lowStockCount: 0
-})
+  lowStockCount: 0,
+});
+const trendType = ref("month");
+let allData = {}; // 存储后端返回的完整对象
+let trendChart = null;
 
-// 初始化饼图
-const initPieChart = (dataList) => {
-  const chartDom = document.getElementById('pieChart')
-  const myChart = echarts.init(chartDom)
-  const option = {
-    tooltip: { trigger: 'item' },
-    legend: { top: '5%', left: 'center' },
+// 渲染趋势图 (支持切换)
+const renderTrendChart = () => {
+  const data =
+    trendType.value === "month" ? allData.dailySalesTrend : allData.monthlySalesTrend;
+  if (!trendChart) trendChart = echarts.init(document.getElementById("trendChart"));
+
+  trendChart.setOption(
+    {
+      tooltip: { trigger: "axis" },
+      xAxis: { type: "category", data: data.map((i) => i.name), boundaryGap: false },
+      yAxis: { type: "value" },
+      series: [
+        {
+          name: "销售额",
+          type: "line",
+          smooth: true,
+          data: data.map((i) => i.value),
+          areaStyle: {
+            color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+              { offset: 0, color: "#409eff" },
+              { offset: 1, color: "#fff" },
+            ]),
+          },
+          itemStyle: { color: "#409eff" },
+        },
+      ],
+    },
+    true,
+  );
+};
+
+// 渲染其他图表
+const initOtherCharts = (data) => {
+  // 销量排行
+  const rankingChart = echarts.init(document.getElementById("rankingChart"));
+  rankingChart.setOption({
+    tooltip: { trigger: "axis" },
+    grid: { left: "3%", right: "8%", bottom: "3%", containLabel: true },
+    xAxis: { type: "value" },
+    yAxis: {
+      type: "category",
+      data: data.brandSalesRanking.map((i) => i.name).reverse(),
+    },
     series: [
       {
-        name: '品牌库存',
-        type: 'pie',
-        radius: ['40%', '70%'],
-        avoidLabelOverlap: false,
-        itemStyle: { borderRadius: 10, borderColor: '#fff', borderWidth: 2 },
-        label: { show: false, position: 'center' },
-        emphasis: { label: { show: true, fontSize: 20, fontWeight: 'bold' } },
-        labelLine: { show: false },
-        data: dataList // 后端传来的数据
-      }
-    ]
-  }
-  myChart.setOption(option)
-}
+        type: "bar",
+        data: data.brandSalesRanking.map((i) => i.value).reverse(),
+        itemStyle: { color: "#67c23a" },
+      },
+    ],
+  });
 
-// 加载数据
+  // 客户饼图 (优化比例)
+  const customerPie = echarts.init(document.getElementById("customerPie"));
+  customerPie.setOption({
+    title: { text: "客户分布", left: "center", bottom: 0 },
+    tooltip: { trigger: "item" },
+    series: [
+      {
+        type: "pie",
+        center: ["50%", "45%"],
+        radius: "60%",
+        label: {
+          show: true,
+          position: "inside", // 核心修改：文字放在内部
+          formatter: "{b}", // 只显示名称，如果想显示百分比可以用 '{b}\n{d}%'
+          color: "#fff", // 内部文字建议用白色，对比度高
+          fontSize: 12,
+          fontWeight: "bold",
+        },
+        data: data.customerTypeDist.map((i) => ({
+          name: i.name === "shop" ? "汽修厂" : "散客",
+          value: i.value,
+        })),
+      },
+    ],
+  });
+
+  // 库存环形图
+  const stockPie = echarts.init(document.getElementById("stockPie"));
+  stockPie.setOption({
+    title: { text: "库存占比", left: "center", bottom: 0 },
+    tooltip: { trigger: "item" },
+    series: [
+      {
+        type: "pie",
+        center: ["50%", "45%"],
+        radius: ["40%", "60%"],
+        data: data.brandPieList,
+        itemStyle: { borderRadius: 5 },
+      },
+    ],
+  });
+};
+
 onMounted(() => {
-  getStatData().then(res => {
-    const data = res.data.info
-    statData.totalSales = data.totalSales
-    statData.totalDebt = data.totalDebt
-    statData.lowStockCount = data.lowStockCount
-
-    // 渲染图表
-    initPieChart(data.brandPieList)
-  })
-})
+  getStatData().then((res) => {
+    allData = res.data.info;
+    Object.assign(statData, allData);
+    renderTrendChart();
+    initOtherCharts(allData);
+  });
+});
 </script>
 
 <style scoped>
 .dashboard-container {
-  padding: 0;
+  padding: 0px;
 }
-
-.card-header {
-  font-size: 14px;
-  color: #666;
+.data-card {
+  color: white;
+  cursor: pointer;
+  border: none;
 }
-
-.card-num {
-  font-size: 28px;
+.card-label {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.card-value {
+  font-size: 24px;
   font-weight: bold;
-  margin-top: 10px;
+  margin-top: 8px;
 }
 
-.sales-card .card-num {
-  color: #67C23A;
+.today-card {
+  background: linear-gradient(135deg, #409eff 0%, #79bbff 100%);
+}
+.sales-card {
+  background: linear-gradient(135deg, #67c23a 0%, #95d475 100%);
+}
+.debt-card {
+  background: linear-gradient(135deg, #f56c6c 0%, #fab6b6 100%);
+}
+.warn-card {
+  background: linear-gradient(135deg, #e6a23c 0%, #f3d19e 100%);
 }
 
-.debt-card .card-num {
-  color: #F56C6C;
-}
-
-.stock-card .card-num {
-  color: #E6A23C;
-}
-
-.quick-entry {
+.chart-header {
   display: flex;
-  gap: 15px;
-  margin-top: 20px;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.pie-group {
+  display: flex;
 }
 </style>

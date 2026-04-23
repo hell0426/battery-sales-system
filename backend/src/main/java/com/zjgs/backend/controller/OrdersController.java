@@ -1,11 +1,17 @@
 package com.zjgs.backend.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjgs.backend.common.utils.RespBean;
+import com.zjgs.backend.entity.OrderItem;
 import com.zjgs.backend.entity.vo.OrderSubmitVo;
+import com.zjgs.backend.entity.vo.SalesQueryVo;
+import com.zjgs.backend.service.IOrderItemService;
 import com.zjgs.backend.service.IOrdersService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 @Tag(name = "销售订单管理")
@@ -17,6 +23,8 @@ public class OrdersController {
     @Autowired
     private IOrdersService ordersService;
 
+    @Autowired
+    private IOrderItemService orderItemService;
     @Operation(summary = "提交订单(开单)")
     @PostMapping("/submit")
     public RespBean submitOrder(@RequestBody OrderSubmitVo vo) {
@@ -69,4 +77,43 @@ public class OrdersController {
 
         return RespBean.ok().msg("结账成功！");
     }
+
+    @Operation(summary = "销售明细统计查询")
+    @PostMapping("/stats/list")
+    public RespBean getSalesStats(@RequestBody SalesQueryVo vo) {
+        // 1. 分页对象
+        Page<OrderItem> pageParam = new Page<>(vo.getPage(), vo.getSize());
+
+        // 2. 构造查询条件
+        QueryWrapper<OrderItem> wrapper = new QueryWrapper<>();
+
+        // 按品牌筛选
+        if (StringUtils.hasText(vo.getBrand())) {
+            wrapper.like("product_name", vo.getBrand()); // 之前明细表存了"品牌-型号"快照
+        }
+        // 按型号筛选
+        if (StringUtils.hasText(vo.getModel())) {
+            wrapper.like("product_name", vo.getModel());
+        }
+
+        // 核心：按日期范围筛选（利用子查询关联 orders 表的时间）
+        if (vo.getDateRange() != null && vo.getDateRange().size() == 2) {
+            wrapper.inSql("order_id", "SELECT id FROM orders WHERE create_time BETWEEN '"
+                    + vo.getDateRange().get(0) + " 00:00:00' AND '" + vo.getDateRange().get(1) + " 23:59:59'");
+        }
+
+        // 3. 执行查询
+        orderItemService.page(pageParam, wrapper);
+
+        // 4. 计算统计总计（当前过滤条件下的总金额）
+        // 这行代码会让页面显得很专业
+        double totalAmount = pageParam.getRecords().stream()
+                .mapToDouble(i -> i.getPrice().doubleValue() * i.getQuantity()).sum();
+
+        return RespBean.ok()
+                .data("list", pageParam.getRecords())
+                .data("total", pageParam.getTotal())
+                .data("summaryAmount", totalAmount);
+    }
+
 }

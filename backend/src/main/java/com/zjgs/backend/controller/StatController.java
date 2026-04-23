@@ -2,18 +2,19 @@ package com.zjgs.backend.controller;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.zjgs.backend.common.utils.RespBean;
+import com.zjgs.backend.entity.Customer;
+import com.zjgs.backend.entity.OrderItem;
 import com.zjgs.backend.entity.Orders;
 import com.zjgs.backend.entity.Product;
 import com.zjgs.backend.entity.vo.StatVo;
+import com.zjgs.backend.service.ICustomerService;
+import com.zjgs.backend.service.IOrderItemService;
 import com.zjgs.backend.service.IOrdersService;
 import com.zjgs.backend.service.IProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
@@ -28,32 +29,61 @@ public class StatController {
     private IOrdersService ordersService;
     @Autowired
     private IProductService productService;
+    @Autowired
+    private ICustomerService customerService;
+    @Autowired
+    private IOrderItemService orderItemService;
 
-    @Operation(summary = "获取首页统计数据")
+    @Operation(summary = "获取仪表盘综合统计数据")
     @GetMapping("/data")
     public RespBean getStatData() {
         StatVo vo = new StatVo();
 
-        // 1. 统计总销售额 (状态为 paid)
-        List<Orders> paidOrders = ordersService.list(new QueryWrapper<Orders>().eq("status", "paid"));
-        double sales = paidOrders.stream().mapToDouble(o -> o.getTotalAmount().doubleValue()).sum();
-        vo.setTotalSales(sales);
+        // 1. 今日销售额 (修正逻辑：统计今天产生的订单总额，不限支付状态)
+        Map<String, Object> todayMap = ordersService.getMap(new QueryWrapper<Orders>()
+                .select("sum(total_amount) as total")
+                .apply("DATE(create_time) = CURDATE()"));
+        vo.setTodaySales(todayMap != null && todayMap.get("total") != null ?
+                Double.parseDouble(todayMap.get("total").toString()) : 0.0);
 
-        // 2. 统计总欠款 (状态为 debt)
-        List<Orders> debtOrders = ordersService.list(new QueryWrapper<Orders>().eq("status", "debt"));
-        double debt = debtOrders.stream().mapToDouble(o -> o.getTotalAmount().doubleValue()).sum();
-        vo.setTotalDebt(debt);
+        // 2. 累计已收金额 (status = 'paid')
+        Map<String, Object> totalSalesMap = ordersService.getMap(new QueryWrapper<Orders>()
+                .select("sum(total_amount) as total").eq("status", "paid"));
+        vo.setTotalSales(totalSalesMap != null && totalSalesMap.get("total") != null ?
+                Double.parseDouble(totalSalesMap.get("total").toString()) : 0.0);
 
-        // 3. 统计库存预警 (假设少于10个算缺货)
-        long lowStock = productService.count(new QueryWrapper<Product>().le("stock", 10));
-        vo.setLowStockCount(lowStock);
+        // 3. 待收挂账总额 (status = 'debt')
+        Map<String, Object> totalDebtMap = ordersService.getMap(new QueryWrapper<Orders>()
+                .select("sum(total_amount) as total").eq("status", "debt"));
+        vo.setTotalDebt(totalDebtMap != null && totalDebtMap.get("total") != null ?
+                Double.parseDouble(totalDebtMap.get("total").toString()) : 0.0);
 
-        // 4. 统计品牌占比 (SQL: select brand as name, count(*) as value from product group by brand)
-        // MyBatis-Plus 的 selectMaps 方法可以直接返回 Map 列表
-        QueryWrapper<Product> pieWrapper = new QueryWrapper<>();
-        pieWrapper.select("brand as name", "count(*) as value").groupBy("brand");
-        List<Map<String, Object>> pieList = productService.listMaps(pieWrapper);
-        vo.setBrandPieList(pieList);
+        // 4. 库存预警数量 (stock < 10)
+        vo.setLowStockCount(productService.count(new QueryWrapper<Product>().le("stock", 10)));
+
+        // 5. 品牌库存分布 (饼图)
+        vo.setBrandPieList(productService.listMaps(new QueryWrapper<Product>()
+                .select("brand as name", "sum(stock) as value").groupBy("brand")));
+
+        // 6. 月度销售走势 (年视图：展示各个月份)
+        vo.setMonthlySalesTrend(ordersService.listMaps(new QueryWrapper<Orders>()
+                .select("DATE_FORMAT(create_time, '%m月') as name", "sum(total_amount) as value")
+                .groupBy("name").orderByAsc("name")));
+
+        // 7. 每日销售走势 (月视图：展示最近30天)
+        vo.setDailySalesTrend(ordersService.listMaps(new QueryWrapper<Orders>()
+                .select("DATE_FORMAT(create_time, '%m-%d') as name", "sum(total_amount) as value")
+                .apply("create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)")
+                .groupBy("name").orderByAsc("name")));
+
+        // 8. 客户类型分布
+        vo.setCustomerTypeDist(customerService.listMaps(new QueryWrapper<Customer>()
+                .select("type as name", "count(*) as value").groupBy("type")));
+
+        // 9. 品牌销量排行 (TOP 5)
+        vo.setBrandSalesRanking(orderItemService.listMaps(new QueryWrapper<OrderItem>()
+                .select("product_name as name", "sum(quantity) as value")
+                .groupBy("name").orderByDesc("value").last("limit 5")));
 
         return RespBean.ok().data("info", vo);
     }

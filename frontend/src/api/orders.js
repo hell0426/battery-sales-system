@@ -27,3 +27,12 @@ export function settleOrder(id) {
         method: 'post'
     })
 }
+
+// 销售统计查询
+export function getSalesStats(data) {
+    return request({
+        url: '/orders/stats/list',
+        method: 'post',
+        data
+    })
+}

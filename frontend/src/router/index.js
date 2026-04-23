@@ -52,6 +52,11 @@ const router = createRouter({
           path: '/category', 
           name: 'ModelManage',
           component: () => import('../views/ModelManage.vue') 
+        },
+        {
+          path: '/sales-stats',
+          name: 'SalesStats',
+          component: () => import('../views/SalesStats.vue')
         }
       ]
     }

@@ -6,10 +6,16 @@ import java.util.List;
 
 @Data
 public class StatVo {
-    private Double totalSales; // 总销售额 (已结)
-    private Double totalDebt;  // 总欠款 (挂账)
-    private Long lowStockCount; // 库存预警数量
+    // 卡片数据
+    private Double totalSales;    // 累计已收
+    private Double totalDebt;     // 待收挂账
+    private Double todaySales;    // 今日销售额
+    private Long lowStockCount;   // 预警型号数
 
     // 图表数据
-    private List<Map<String, Object>> brandPieList; // 品牌占比数据
+    private List<Map<String, Object>> brandPieList;      // 品牌库存占比
+    private List<Map<String, Object>> monthlySalesTrend; // 月度销售趋势 (年视图)
+    private List<Map<String, Object>> dailySalesTrend;   // 每日销售趋势 (月视图)
+    private List<Map<String, Object>> customerTypeDist;  // 客户类型分布
+    private List<Map<String, Object>> brandSalesRanking; // 品牌销量排行
 }

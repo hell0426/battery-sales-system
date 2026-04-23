@@ -60,6 +60,11 @@
           <el-icon><Avatar /></el-icon>
           <span>员工账号管理</span>
         </el-menu-item>
+        <!--销售数据统计页面 -->
+        <el-menu-item v-if="role === 'admin'" index="/sales-stats">
+          <el-icon><Avatar /></el-icon>
+          <span>销售数据统计</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
