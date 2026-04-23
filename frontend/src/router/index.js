@@ -42,6 +42,16 @@ const router = createRouter({
           path: '/settlement',
           name: 'Settlement',
           component: () => import('../views/Settlement.vue')
+        },
+        { 
+          path: '/user', 
+          name: 'UserManage',
+          component: () => import('../views/UserManage.vue') 
+        },
+        { 
+          path: '/category', 
+          name: 'ModelManage',
+          component: () => import('../views/ModelManage.vue') 
         }
       ]
     }

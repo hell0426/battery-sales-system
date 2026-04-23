@@ -47,6 +47,19 @@
           </el-icon>
           <span>月结对账</span>
         </el-menu-item>
+        <!-- ... 前面的菜单项保持不变 ... -->
+
+        <!-- 型号配置 -->
+        <el-menu-item v-if="role === 'admin'" index="/category">
+          <el-icon><Menu /></el-icon>
+          <span>品牌型号管理</span>
+        </el-menu-item>
+
+        <!--员工管理 -->
+        <el-menu-item v-if="role === 'admin'" index="/user">
+          <el-icon><Avatar /></el-icon>
+          <span>员工账号管理</span>
+        </el-menu-item>
       </el-menu>
     </el-aside>
 
