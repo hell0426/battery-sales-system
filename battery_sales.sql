@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 22/04/2026 18:06:04
+ Date: 23/04/2026 11:13:40
 */
 
 SET NAMES utf8mb4;
@@ -161,12 +161,15 @@ CREATE TABLE `sys_user`  (
   `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '密码',
   `real_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '真实姓名',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP,
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT 'staff' COMMENT '角色',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 2 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统用户表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 4 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_0900_ai_ci COMMENT = '系统用户表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of sys_user
 -- ----------------------------
-INSERT INTO `sys_user` VALUES (1, 'admin', '123456', '超级管理员', '2026-03-01 22:44:23');
+INSERT INTO `sys_user` VALUES (1, 'admin', '123456', '超级管理员', '2026-03-01 22:44:23', 'admin');
+INSERT INTO `sys_user` VALUES (2, 'xiaozhang', '123456', '店员小张', '2026-04-23 10:06:39', 'staff');
+INSERT INTO `sys_user` VALUES (3, 'xiaoli', '123456', '店员小李', '2026-04-23 10:06:39', 'staff');
 
 SET FOREIGN_KEY_CHECKS = 1;

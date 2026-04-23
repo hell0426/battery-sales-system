@@ -43,7 +43,7 @@ public class CodeGenerator{
                             ))
                     )
                     .strategyConfig(builder ->
-                            builder.addInclude("brand", "product_model") // 设置需要生成的4张表名
+                            builder.addInclude("sys_user") // 设置需要生成的4张表名
                                     .entityBuilder()
                                     .enableLombok() // 启用 Lombok
                                     .enableTableFieldAnnotation() // 启用字段注解

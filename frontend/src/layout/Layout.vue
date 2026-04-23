@@ -1,5 +1,5 @@
 <template>
-  <el-container style="height: 100vh;">
+  <el-container style="height: 100vh">
     <!-- 左侧侧边栏 -->
     <el-aside width="220px" class="aside-menu">
       <!-- Logo 区域 -->
@@ -9,9 +9,15 @@
       </div>
 
       <!-- 菜单项 -->
-      <el-menu active-text-color="#409eff" background-color="#1e222d" class="el-menu-vertical" text-color="#a3a6af"
-        :default-active="$route.path" router>
-        <el-menu-item index="/dashboard">
+      <el-menu
+        active-text-color="#409eff"
+        background-color="#1e222d"
+        class="el-menu-vertical"
+        text-color="#a3a6af"
+        :default-active="$route.path"
+        router
+      >
+        <el-menu-item v-if="role === 'admin'" index="/dashboard">
           <el-icon>
             <DataBoard />
           </el-icon>
@@ -35,7 +41,7 @@
           </el-icon>
           <span>客户管理</span>
         </el-menu-item>
-        <el-menu-item index="/settlement">
+        <el-menu-item v-if="role === 'admin'" index="/settlement">
           <el-icon>
             <Notebook />
           </el-icon>
@@ -49,7 +55,9 @@
       <!-- 顶部 Header (可选，比如放个退出登录) -->
       <el-header class="main-header">
         <div class="header-right">
-          <el-button type="danger" text icon="SwitchButton">退出登录</el-button>
+          <el-button type="danger" text icon="SwitchButton" @click="handleLogout"
+            >退出登录</el-button
+          >
         </div>
       </el-header>
 
@@ -62,7 +70,29 @@
 </template>
 
 <script setup>
-// 不需要写什么逻辑，单纯的页面骨架
+import { useRouter } from "vue-router";
+import { ElMessage, ElMessageBox } from "element-plus";
+
+const router = useRouter();
+const role = localStorage.getItem("userRole"); // 获取角色给菜单用
+
+// 退出登录逻辑
+const handleLogout = () => {
+  ElMessageBox.confirm("确定要退出系统吗？", "提示", {
+    confirmButtonText: "确定",
+    cancelButtonText: "取消",
+    type: "warning",
+  }).then(() => {
+    // 1. 清除本地存储的用户信息
+    localStorage.removeItem("userRole");
+    localStorage.removeItem("realName");
+    localStorage.removeItem("username");
+
+    // 2. 提示并跳转到登录页
+    ElMessage.success("退出成功");
+    router.push("/login");
+  });
+};
 </script>
 
 <style scoped>
