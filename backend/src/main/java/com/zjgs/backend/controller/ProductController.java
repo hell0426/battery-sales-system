@@ -2,6 +2,7 @@ package com.zjgs.backend.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjgs.backend.common.utils.RespBean;
 import com.zjgs.backend.entity.OrderItem;
@@ -25,36 +26,33 @@ public class ProductController {
     private IProductService productService;
     @Autowired
     private IOrderItemService orderItemService; // 注入订单明细服务
-
+    @Autowired
+    private com.zjgs.backend.mapper.ProductMapper productMapper;
 
     // --- 1. 分页查询 (模仿你以前的 getCourses 写法) ---
     @Operation(summary = "分页条件查询")
-    @PostMapping("/list") // 注意：因为 Vo 是 @RequestBody 传参，建议用 PostMapping
+    @PostMapping("/list")
     public RespBean getList(@RequestBody ProductQueryVo vo) {
-        // 1. 创建分页对象
         Page<Product> pageParam = new Page<>(vo.getPage(), vo.getSize());
 
-        // 2. 创建查询条件 (推荐用 LambdaQueryWrapper，防止字段名写错)
-        LambdaQueryWrapper<Product> wrapper = new LambdaQueryWrapper<>();
-
-        // 品牌查询
+        // 这里依然可以用 LambdaQueryWrapper，但查询时要用我们定义的 mapper 方法
+        // 注意：这里的 wrapper 里的字段名要写 SQL 里的别名或者原始列名
+        QueryWrapper<Product> wrapper = new QueryWrapper<>();
+        wrapper.eq("p.is_deleted", 0);
         if (StringUtils.hasText(vo.getBrand())) {
-            wrapper.like(Product::getBrand, vo.getBrand());
+            wrapper.like("b.name", vo.getBrand()); // 注意：这里连的是品牌表的别名 b
         }
-        // 型号查询
         if (StringUtils.hasText(vo.getModel())) {
-            wrapper.like(Product::getModel, vo.getModel());
+            wrapper.like("m.name", vo.getModel()); // 注意：这里连的是型号表的别名 m
         }
-        // 按时间倒序
-        wrapper.orderByDesc(Product::getCreateTime);
+        wrapper.orderByDesc("p.create_time");
 
-        // 3. 调用业务层
-        productService.page(pageParam, wrapper);
+        // 调用自定义的联表方法
+        productMapper.selectProductPage(pageParam, wrapper);
 
-        // 4. 返回结果 (完全按照你以前的习惯)
         return RespBean.ok()
-                .data("list", pageParam.getRecords()) // 数据列表
-                .data("total", pageParam.getTotal()); // 总条数
+                .data("list", pageParam.getRecords())
+                .data("total", pageParam.getTotal());
     }
 
     // --- 2. 新增 ---

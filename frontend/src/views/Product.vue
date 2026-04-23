@@ -3,7 +3,7 @@
     <!-- 1. 顶部搜索栏 -->
     <el-card class="search-card">
       <el-form :inline="true" :model="queryForm">
-        <el-form-item label="品牌">
+        <el-form-item prop="brand" label="品牌">
           <!-- 搜索用的品牌下拉 -->
           <el-select
             v-model="queryForm.brand"
@@ -21,7 +21,7 @@
           </el-select>
         </el-form-item>
 
-        <el-form-item label="型号">
+        <el-form-item prop="modelId" label="型号">
           <!-- 搜索用的型号下拉 -->
           <el-select
             v-model="queryForm.model"
@@ -58,8 +58,8 @@
     <el-card class="table-card">
       <el-table :data="tableData" border v-loading="loading">
         <el-table-column prop="id" label="ID" width="80" align="center" />
-        <el-table-column prop="brand" label="品牌" width="120" />
-        <el-table-column prop="model" label="型号" width="150" />
+        <el-table-column prop="brandName" label="品牌" width="120" />
+        <el-table-column prop="modelName" label="型号" width="150" />
         <el-table-column prop="costPrice" label="进价(元)" />
         <el-table-column prop="sellingPrice" label="售价(元)">
           <template #default="scope">
@@ -125,9 +125,9 @@
             />
           </el-select>
         </el-form-item>
-        <el-form-item label="型号" prop="model">
+        <el-form-item label="型号" prop="modelId">
           <el-select
-            v-model="form.model"
+            v-model="form.modelId"
             placeholder="请选择型号"
             :disabled="!tempBrandId"
             style="width: 100%"
@@ -136,7 +136,7 @@
               v-for="item in dialogModelOptions"
               :key="item.id"
               :label="item.name"
-              :value="item.name"
+              :value="item.id"
             />
           </el-select>
         </el-form-item>
@@ -183,6 +183,7 @@ const form = reactive({
   id: null,
   brand: "",
   model: "",
+  modelId: null,
   costPrice: 0,
   sellingPrice: 0,
   stock: 0,
@@ -190,7 +191,7 @@ const form = reactive({
 
 const rules = {
   brand: [{ required: true, message: "请选择品牌", trigger: "change" }],
-  model: [{ required: true, message: "请选择型号", trigger: "change" }],
+  modelId: [{ required: true, message: "请选择型号", trigger: "change" }],
 };
 
 // 拿到当前登录人的角色
@@ -269,6 +270,8 @@ const handleAdd = () => {
 const handleEdit = (row) => {
   dialogTitle.value = "编辑电瓶";
   Object.assign(form, row);
+  // 回显时直接使用后端传回来的 modelId
+  tempBrandId.value = null; // 这里的逻辑可以优化为先去查型号属于哪个品牌，或者让后端直接带回 brandId
   const brand = brandOptions.value.find((b) => b.name === row.brand);
   if (brand) {
     tempBrandId.value = brand.id;
@@ -300,7 +303,14 @@ const handleDelete = (id) => {
     });
   });
 };
-
+// 必须加上这个函数，否则页面会报错
+const resetForm = () => {
+  if (formRef.value) {
+    formRef.value.resetFields();
+  }
+  tempBrandId.value = null;
+  dialogModelOptions.value = [];
+};
 onMounted(() => {
   loadBrands();
   loadData();

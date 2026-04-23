@@ -38,19 +38,14 @@ public class Product implements Serializable {
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
-    /**
-     * 品牌 (风帆/骆驼)
-     */
-    @TableField("brand")
-    @Schema(description = "品牌 (风帆/骆驼)")
-    private String brand;
+    // 重点：虚拟字段，加 exist = false 注解
+    @TableField(exist = false)
+    @Schema(description = "品牌名")
+    private String brandName;
 
-    /**
-     * 型号 (6-QW-45)
-     */
-    @TableField("model")
-    @Schema(description = "型号 (6-QW-45)")
-    private String model;
+    @TableField(exist = false)
+    @Schema(description = "型号名")
+    private String modelName;
 
     /**
      * 进价
@@ -94,4 +89,10 @@ public class Product implements Serializable {
     @TableField("is_deleted")
     @Schema(description = "逻辑删除(1:已删, 0:未删)")
     private Integer isDeleted;
+    /**
+     * 关联型号表id
+     */
+    @TableField("model_id")
+    @Schema(description = "关联型号表id")
+    private Integer modelId;
 }
