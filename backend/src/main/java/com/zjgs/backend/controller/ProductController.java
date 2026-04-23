@@ -4,8 +4,10 @@ package com.zjgs.backend.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zjgs.backend.common.utils.RespBean;
+import com.zjgs.backend.entity.OrderItem;
 import com.zjgs.backend.entity.Product;
 import com.zjgs.backend.entity.vo.ProductQueryVo;
+import com.zjgs.backend.service.IOrderItemService;
 import com.zjgs.backend.service.IProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,6 +23,9 @@ public class ProductController {
 
     @Autowired
     private IProductService productService;
+    @Autowired
+    private IOrderItemService orderItemService; // 注入订单明细服务
+
 
     // --- 1. 分页查询 (模仿你以前的 getCourses 写法) ---
     @Operation(summary = "分页条件查询")
@@ -77,15 +82,19 @@ public class ProductController {
     }
 
     // --- 4. 删除 ---
-    @Operation(summary = "删除电瓶")
     @DeleteMapping("/delete/{id}")
     public RespBean delete(@PathVariable Integer id) {
-        boolean result = productService.removeById(id);
-        if (result) {
-            return RespBean.ok().msg("删除成功");
-        } else {
-            return RespBean.err().msg("删除失败");
+        // 检查订单明细表里是否有这个电瓶的销售记录
+        long saleCount = orderItemService.count(new LambdaQueryWrapper<OrderItem>().eq(OrderItem::getProductId, id));
+
+        if (saleCount > 0) {
+            return RespBean.err().msg("该电瓶已有销售记录，不可删除，建议修改库存为0或进行下架处理！");
         }
+
+        if(productService.removeById(id)) {
+            return RespBean.ok().msg("删除成功");
+        }
+        return RespBean.err().msg("删除失败");
     }
 
     // --- 5. 回显详情 ---
