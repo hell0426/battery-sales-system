@@ -7,10 +7,17 @@
           <template #header>
             <div class="card-header">
               <span class="title">📦 商品选购</span>
+              <el-input
+                v-model="searchText"
+                placeholder="搜索型号..."
+                style="width: 200px"
+                prefix-icon="Search"
+                clearable
+              />
             </div>
           </template>
 
-          <!-- 品牌分类标签页 -->
+          <!-- 品牌分类标签页：修改为 brandName -->
           <el-tabs v-model="activeBrand" class="brand-tabs">
             <el-tab-pane
               v-for="(products, brand) in groupedProducts"
@@ -18,7 +25,6 @@
               :label="brand"
               :name="brand"
             >
-              <!-- 缩短后的商品网格 -->
               <div class="product-grid">
                 <div
                   v-for="p in products"
@@ -27,7 +33,8 @@
                   :class="{ 'out-of-stock': p.stock <= 0 }"
                   @click="addToCart(p)"
                 >
-                  <div class="p-model">{{ p.model }}</div>
+                  <!-- p.model 改为 p.modelName -->
+                  <div class="p-model">{{ p.modelName }}</div>
                   <div class="p-price">¥{{ p.sellingPrice }}</div>
                   <div class="p-stock">库存: {{ p.stock }}</div>
                   <div class="add-icon">
@@ -45,7 +52,7 @@
         </el-card>
       </el-col>
 
-      <!-- 右侧：购物车区 (保持不变，略作美化) -->
+      <!-- 右侧：购物车区 -->
       <el-col :span="10">
         <el-card class="cart-area" shadow="never">
           <template #header>
@@ -54,8 +61,9 @@
 
           <el-table :data="cartList" height="350" stripe size="small">
             <el-table-column label="型号">
+              <!-- 改为显示 brandName 和 modelName -->
               <template #default="scope"
-                >{{ scope.row.brand }} {{ scope.row.model }}</template
+                >{{ scope.row.brandName }} {{ scope.row.modelName }}</template
               >
             </el-table-column>
             <el-table-column label="数量" width="150">
@@ -146,26 +154,26 @@ const payStatus = ref("paid");
 const submitting = ref(false);
 const activeBrand = ref("");
 
-// 核心逻辑：将商品列表按品牌分组
+// 分组逻辑改为识别 brandName 和 modelName
 const groupedProducts = computed(() => {
   const groups = {};
   productList.value.forEach((p) => {
-    // 如果有搜索词，过滤掉不匹配的型号
+    // 搜索逻辑适配新的 modelName 字段
     if (
       searchText.value &&
-      !p.model.toLowerCase().includes(searchText.value.toLowerCase())
+      !p.modelName?.toLowerCase().includes(searchText.value.toLowerCase())
     ) {
       return;
     }
-    if (!groups[p.brand]) {
-      groups[p.brand] = [];
+    const bName = p.brandName || "未知品牌";
+    if (!groups[bName]) {
+      groups[bName] = [];
     }
-    groups[p.brand].push(p);
+    groups[bName].push(p);
   });
   return groups;
 });
 
-// 监听分组变化，默认选中第一个品牌
 watch(groupedProducts, (newVal) => {
   if (!activeBrand.value && Object.keys(newVal).length > 0) {
     activeBrand.value = Object.keys(newVal)[0];
@@ -177,6 +185,7 @@ const totalAmount = computed(() => {
 });
 
 const loadProducts = () => {
+  // 这里的接口会触发 ProductController 的联表查询
   getProductList({ page: 1, size: 500 }).then((res) => {
     productList.value = res.data.list;
   });
@@ -195,10 +204,11 @@ const addToCart = (product) => {
     if (existItem.quantity < product.stock) existItem.quantity++;
     else ElMessage.warning("超过库存上限");
   } else {
+    // 存入购物车的字段名也要更新
     cartList.value.push({
       id: product.id,
-      brand: product.brand,
-      model: product.model,
+      brandName: product.brandName,
+      modelName: product.modelName,
       sellingPrice: product.sellingPrice,
       quantity: 1,
       maxStock: product.stock,
@@ -256,8 +266,6 @@ onMounted(() => {
   justify-content: space-between;
   align-items: center;
 }
-
-/* 品牌标签样式 */
 .brand-tabs {
   margin-top: -10px;
 }
@@ -265,8 +273,6 @@ onMounted(() => {
   font-weight: bold;
   font-size: 15px;
 }
-
-/* 重新设计的紧凑型卡片网格 */
 .product-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -275,7 +281,6 @@ onMounted(() => {
   overflow-y: auto;
   max-height: 60vh;
 }
-
 .product-item {
   position: relative;
   background: #fff;
@@ -285,19 +290,16 @@ onMounted(() => {
   text-align: center;
   cursor: pointer;
   transition: all 0.2s;
-  /* 固定高度，解决“面积太长”的问题 */
   height: 110px;
   display: flex;
   flex-direction: column;
   justify-content: center;
 }
-
 .product-item:hover {
   border-color: #409eff;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   transform: translateY(-2px);
 }
-
 .p-model {
   font-weight: bold;
   font-size: 15px;
@@ -314,7 +316,6 @@ onMounted(() => {
   font-size: 12px;
   color: #909399;
 }
-
 .add-icon {
   position: absolute;
   right: 8px;
@@ -326,14 +327,11 @@ onMounted(() => {
 .product-item:hover .add-icon {
   opacity: 1;
 }
-
 .out-of-stock {
   background: #f5f7fa;
   opacity: 0.6;
   cursor: not-allowed;
 }
-
-/* 结算区 */
 .checkout-area {
   border-top: 1px solid #ebeef5;
   padding-top: 15px;

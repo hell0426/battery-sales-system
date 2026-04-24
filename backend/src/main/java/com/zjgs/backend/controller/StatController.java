@@ -7,6 +7,7 @@ import com.zjgs.backend.entity.OrderItem;
 import com.zjgs.backend.entity.Orders;
 import com.zjgs.backend.entity.Product;
 import com.zjgs.backend.entity.vo.StatVo;
+import com.zjgs.backend.mapper.ProductMapper; // 🔴 引入
 import com.zjgs.backend.service.ICustomerService;
 import com.zjgs.backend.service.IOrderItemService;
 import com.zjgs.backend.service.IOrdersService;
@@ -34,12 +35,15 @@ public class StatController {
     @Autowired
     private IOrderItemService orderItemService;
 
+    @Autowired
+    private ProductMapper productMapper; // 🔴 注入 Mapper 以使用手写 SQL
+
     @Operation(summary = "获取仪表盘综合统计数据")
     @GetMapping("/data")
     public RespBean getStatData() {
         StatVo vo = new StatVo();
 
-        // 1. 今日销售额 (修正逻辑：统计今天产生的订单总额，不限支付状态)
+        // 1. 今日销售额 (修正逻辑：使用 CURDATE() 函数，统计今天所有的订单金额)
         Map<String, Object> todayMap = ordersService.getMap(new QueryWrapper<Orders>()
                 .select("sum(total_amount) as total")
                 .apply("DATE(create_time) = CURDATE()"));
@@ -61,16 +65,15 @@ public class StatController {
         // 4. 库存预警数量 (stock < 10)
         vo.setLowStockCount(productService.count(new QueryWrapper<Product>().le("stock", 10)));
 
-        // 5. 品牌库存分布 (饼图)
-        vo.setBrandPieList(productService.listMaps(new QueryWrapper<Product>()
-                .select("brand as name", "sum(stock) as value").groupBy("brand")));
+        // 5. 品牌库存分布 (使用 Mapper 里的联表查询)
+        vo.setBrandPieList(productMapper.getStockDistribution());
 
-        // 6. 月度销售走势 (年视图：展示各个月份)
+        // 6. 月度销售趋势 (年度视图)
         vo.setMonthlySalesTrend(ordersService.listMaps(new QueryWrapper<Orders>()
                 .select("DATE_FORMAT(create_time, '%m月') as name", "sum(total_amount) as value")
                 .groupBy("name").orderByAsc("name")));
 
-        // 7. 每日销售走势 (月视图：展示最近30天)
+        // 7. 每日销售走势 (最近30天视图)
         vo.setDailySalesTrend(ordersService.listMaps(new QueryWrapper<Orders>()
                 .select("DATE_FORMAT(create_time, '%m-%d') as name", "sum(total_amount) as value")
                 .apply("create_time >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)")
