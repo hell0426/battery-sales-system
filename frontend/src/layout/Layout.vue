@@ -4,8 +4,8 @@
     <el-aside width="220px" class="aside-menu">
       <!-- Logo 区域 -->
       <div class="logo">
-        <h2>电瓶管家 Pro</h2>
-        <span class="sub-logo">小微汽修管理系统</span>
+        <h2>电瓶进销存与</h2>
+        <h2>挂账管理系统</h2>
       </div>
 
       <!-- 菜单项 -->

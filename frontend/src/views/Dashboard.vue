@@ -152,23 +152,21 @@ const initOtherCharts = (data) => {
     ],
   });
 
-  // 客户饼图 (优化比例)
   const customerPie = echarts.init(document.getElementById("customerPie"));
   customerPie.setOption({
-    title: { text: "客户分布", left: "center", bottom: 0 },
+    title: { text: "客户分布", left: "center", bottom: 10 },
     tooltip: { trigger: "item" },
     series: [
       {
         type: "pie",
         center: ["50%", "45%"],
-        radius: "60%",
+        radius: "65%", // 稍微缩小一点，显得精致
         label: {
           show: true,
-          position: "inside", // 核心修改：文字放在内部
-          formatter: "{b}", // 只显示名称，如果想显示百分比可以用 '{b}\n{d}%'
-          color: "#fff", // 内部文字建议用白色，对比度高
-          fontSize: 12,
-          fontWeight: "bold",
+          position: "inside",
+          formatter: "{b}",
+          color: "#fff",
+          fontSize: 11,
         },
         data: data.customerTypeDist.map((i) => ({
           name: i.name === "shop" ? "汽修厂" : "散客",
@@ -178,18 +176,45 @@ const initOtherCharts = (data) => {
     ],
   });
 
-  // 库存环形图
+  // 3. 库存占比环形图 (优化版)
   const stockPie = echarts.init(document.getElementById("stockPie"));
   stockPie.setOption({
-    title: { text: "库存占比", left: "center", bottom: 0 },
-    tooltip: { trigger: "item" },
+    title: {
+      text: "库存占比",
+      left: "30%", // 圆心左移了，标题也要跟着左移
+      top: "center",
+      textStyle: { fontSize: 13 },
+    },
+    tooltip: { trigger: "item", formatter: "{b}: {c}个 ({d}%)" },
+    legend: {
+      orient: "vertical",
+      right: "0", // 靠最右边
+      top: "middle",
+      itemWidth: 8,
+      itemHeight: 8,
+      textStyle: { fontSize: 10 },
+      // 如果品牌名太长，这里可以限制一下显示长度
+      formatter: function (name) {
+        return name.length > 8 ? name.slice(0, 8) + "..." : name;
+      },
+    },
     series: [
       {
         type: "pie",
-        center: ["50%", "45%"],
-        radius: ["40%", "60%"],
+        center: ["35%", "50%"], // 关键：圆心从 50% 移到 35%，给右边图例留出大量空间
+        radius: ["40%", "65%"], // 略微缩小外径，防止溢出
+        avoidLabelOverlap: true,
+        label: {
+          show: true,
+          position: "inside",
+          formatter: "{d}%",
+          fontSize: 9, // 字号调小一点，防止重叠
+          color: "#fff",
+        },
+        // 关键：如果占比太小（比如那个1.46%），就不显示里面的文字，防止重叠
+        minShowLabelAngle: 5,
         data: data.brandPieList,
-        itemStyle: { borderRadius: 5 },
+        itemStyle: { borderRadius: 4, borderColor: "#fff", borderWidth: 2 },
       },
     ],
   });

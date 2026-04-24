@@ -60,7 +60,7 @@
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="brandName" label="品牌" width="120" />
         <el-table-column prop="modelName" label="型号" width="150" />
-        <el-table-column prop="costPrice" label="进价(元)" />
+        <el-table-column v-if="userRole === 'admin'" prop="costPrice" label="进价(元)" />
         <el-table-column prop="sellingPrice" label="售价(元)">
           <template #default="scope">
             <span style="color: #f56c6c; font-weight: bold"
