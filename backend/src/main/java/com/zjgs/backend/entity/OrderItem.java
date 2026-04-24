@@ -78,4 +78,9 @@ public class OrderItem implements Serializable {
     @TableField("create_time")
     @Schema(description = "创建时间")
     private LocalDateTime createTime;
+
+
+    @TableField(exist = false) // 表示数据库里没这一列，只是查询结果显示用
+    @Schema(description = "客户名称")
+    private String customerName;
 }

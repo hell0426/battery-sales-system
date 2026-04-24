@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 24/04/2026 15:06:01
+ Date: 24/04/2026 17:12:46
 */
 
 SET NAMES utf8mb4;
@@ -30,11 +30,11 @@ CREATE TABLE `brand`  (
 -- ----------------------------
 -- Records of brand
 -- ----------------------------
-INSERT INTO `brand` VALUES (1, '风帆 (Fengfan)');
-INSERT INTO `brand` VALUES (2, '骆驼 (Camel)');
-INSERT INTO `brand` VALUES (3, '瓦尔塔 (Varta)');
-INSERT INTO `brand` VALUES (4, '天能 (Tianneng)');
-INSERT INTO `brand` VALUES (5, '超威 (Chilwee)');
+INSERT INTO `brand` VALUES (1, '风帆');
+INSERT INTO `brand` VALUES (2, '骆驼');
+INSERT INTO `brand` VALUES (3, '瓦尔塔');
+INSERT INTO `brand` VALUES (4, '天能');
+INSERT INTO `brand` VALUES (5, '超威');
 
 -- ----------------------------
 -- Table structure for customer
@@ -73,7 +73,7 @@ CREATE TABLE `order_item`  (
   `price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '成交单价',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of order_item
@@ -89,6 +89,7 @@ INSERT INTO `order_item` VALUES (8, 7, 1, '风帆 - 6-QW-45(390)-L', 2, 350.00, 
 INSERT INTO `order_item` VALUES (9, 8, 4, '瓦尔塔 - L2-400', 2, 550.00, '2026-04-24 14:31:51');
 INSERT INTO `order_item` VALUES (10, 9, 2, '风帆 - 12V-100AH', 3, 700.00, '2026-04-24 14:31:51');
 INSERT INTO `order_item` VALUES (11, 10, 1, '风帆 - 6-QW-45(390)-L', 1, 350.00, '2026-04-24 14:31:51');
+INSERT INTO `order_item` VALUES (12, 11, 6, '天能 (Tianneng) - 6-DZM-12', 3, 260.00, '2026-04-24 15:36:16');
 
 -- ----------------------------
 -- Table structure for orders
@@ -103,7 +104,7 @@ CREATE TABLE `orders`  (
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NULL DEFAULT 0 COMMENT '逻辑删除(1:已删, 0:未删)',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 11 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of orders
@@ -118,6 +119,7 @@ INSERT INTO `orders` VALUES (7, 1, 700.00, 'paid', '2026-04-10 13:00:00', '2026-
 INSERT INTO `orders` VALUES (8, 3, 1100.00, 'paid', '2026-04-18 09:00:00', '2026-04-24 14:31:51', 0);
 INSERT INTO `orders` VALUES (9, 2, 2100.00, 'debt', '2026-04-22 14:00:00', '2026-04-24 14:31:51', 0);
 INSERT INTO `orders` VALUES (10, 1, 350.00, 'paid', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `orders` VALUES (11, 4, 780.00, 'debt', '2026-04-24 15:36:16', '2026-04-24 15:36:16', 0);
 
 -- ----------------------------
 -- Table structure for product
@@ -143,7 +145,7 @@ INSERT INTO `product` VALUES (2, 450.00, 680.00, 5, '2026-02-01 10:00:00', '2026
 INSERT INTO `product` VALUES (3, 280.00, 420.00, 30, '2026-02-10 10:00:00', '2026-04-24 14:31:51', 0, 3);
 INSERT INTO `product` VALUES (4, 320.00, 550.00, 8, '2026-02-15 10:00:00', '2026-04-24 14:31:51', 0, 4);
 INSERT INTO `product` VALUES (5, 800.00, 1200.00, 15, '2026-03-01 10:00:00', '2026-04-24 14:31:51', 0, 5);
-INSERT INTO `product` VALUES (6, 150.00, 260.00, 100, '2026-03-05 10:00:00', '2026-04-24 14:31:51', 0, 6);
+INSERT INTO `product` VALUES (6, 150.00, 260.00, 97, '2026-03-05 10:00:00', '2026-04-24 14:31:51', 0, 6);
 INSERT INTO `product` VALUES (7, 180.00, 310.00, 3, '2026-04-01 10:00:00', '2026-04-24 14:31:51', 0, 7);
 
 -- ----------------------------
@@ -161,7 +163,7 @@ CREATE TABLE `product_model`  (
 -- Records of product_model
 -- ----------------------------
 INSERT INTO `product_model` VALUES (1, 1, '6-QW-45(390)-L');
-INSERT INTO `product_model` VALUES (2, 1, '12V-100AH');
+INSERT INTO `product_model` VALUES (2, 1, '12V-100AHH');
 INSERT INTO `product_model` VALUES (3, 2, '6-QW-60(450)-L');
 INSERT INTO `product_model` VALUES (4, 3, 'L2-400');
 INSERT INTO `product_model` VALUES (5, 3, 'AGM-H6');

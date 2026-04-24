@@ -272,12 +272,16 @@ const handleEdit = (row) => {
   Object.assign(form, row);
   // 回显时直接使用后端传回来的 modelId
   tempBrandId.value = null; // 这里的逻辑可以优化为先去查型号属于哪个品牌，或者让后端直接带回 brandId
-  const brand = brandOptions.value.find((b) => b.name === row.brand);
+  const brand = brandOptions.value.find((b) => b.name === row.brandName);
   if (brand) {
     tempBrandId.value = brand.id;
     getModelsByBrand(brand.id).then((res) => {
       dialogModelOptions.value = res.data.items;
     });
+  } else {
+    // 如果没找到品牌，清空相关状态
+    tempBrandId.value = null;
+    dialogModelOptions.value = [];
   }
   dialogVisible.value = true;
 };

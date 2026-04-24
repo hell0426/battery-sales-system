@@ -14,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @Tag(name = "销售订单管理")
 @RestController
 @RequestMapping("/orders")
@@ -25,6 +27,8 @@ public class OrdersController {
 
     @Autowired
     private IOrderItemService orderItemService;
+    @Autowired
+    private com.zjgs.backend.mapper.OrderItemMapper orderItemMapper;
     @Operation(summary = "提交订单(开单)")
     @PostMapping("/submit")
     public RespBean submitOrder(@RequestBody OrderSubmitVo vo) {
@@ -95,25 +99,27 @@ public class OrdersController {
         if (StringUtils.hasText(vo.getModel())) {
             wrapper.like("product_name", vo.getModel());
         }
-
+        // 增加客户姓名过滤 (注意这里 c 是 customer 表的别名)
+        if (StringUtils.hasText(vo.getCustomerName())) {
+            wrapper.like("c.name", vo.getCustomerName());
+        }
         // 核心：按日期范围筛选（利用子查询关联 orders 表的时间）
         if (vo.getDateRange() != null && vo.getDateRange().size() == 2) {
             wrapper.inSql("order_id", "SELECT id FROM orders WHERE create_time BETWEEN '"
                     + vo.getDateRange().get(0) + " 00:00:00' AND '" + vo.getDateRange().get(1) + " 23:59:59'");
         }
 
-        // 3. 执行查询
-        orderItemService.page(pageParam, wrapper);
-
-        // 4. 计算统计总计（当前过滤条件下的总金额）
-        // 这行代码会让页面显得很专业
-        double totalAmount = pageParam.getRecords().stream()
-                .mapToDouble(i -> i.getPrice().doubleValue() * i.getQuantity()).sum();
+        // 3. 关键修改：调用刚才 Mapper 里写的新统计方法
+        Double totalAmount = orderItemMapper.selectSumAmount(wrapper);
+        if (totalAmount == null) totalAmount = 0.0;
+        // 4. 执行分页查询
+        wrapper.orderByDesc("oi.id"); // 按ID倒序，让最新的在前面
+        // 关键修改：调用 mapper 的新方法
+        orderItemMapper.selectSalesStatsPage(pageParam, wrapper);
 
         return RespBean.ok()
                 .data("list", pageParam.getRecords())
                 .data("total", pageParam.getTotal())
                 .data("summaryAmount", totalAmount);
     }
-
 }

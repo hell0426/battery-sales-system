@@ -19,6 +19,7 @@
             v-model="queryForm.brand"
             placeholder="全部品牌"
             clearable
+            style="width: 200px"
             @change="loadData"
           >
             <el-option
@@ -34,8 +35,25 @@
             v-model="queryForm.model"
             placeholder="输入型号"
             clearable
+            style="width: 200px"
             @input="loadData"
           />
+        </el-form-item>
+        <el-form-item label="客户">
+          <el-select
+            v-model="queryForm.customerName"
+            placeholder="选择客户"
+            clearable
+            style="width: 200px"
+            @change="loadData"
+          >
+            <el-option
+              v-for="item in customerOptions"
+              :key="item.id"
+              :label="item.name"
+              :value="item.name"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="Search" @click="loadData">开始统计</el-button>
@@ -65,6 +83,7 @@
         :summary-method="getSummaries"
       >
         <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column prop="customerName" label="购买客户" width="150" />
         <el-table-column prop="productName" label="电瓶信息" min-width="200" />
         <el-table-column prop="price" label="销售单价" width="120">
           <template #default="scope">¥{{ scope.row.price }}</template>
@@ -97,12 +116,14 @@
 import { ref, reactive, onMounted } from "vue";
 import { getSalesStats } from "@/api/orders";
 import { getBrandList } from "@/api/category";
+import { getCustomerList } from "@/api/customer"; // 引入客户接口
 
 const loading = ref(false);
 const tableData = ref([]);
 const total = ref(0);
 const summaryAmount = ref(0);
 const brandOptions = ref([]);
+const customerOptions = ref([]); // 存储客户下拉列表
 
 const queryForm = reactive({
   page: 1,
@@ -128,6 +149,11 @@ const loadBrands = () => {
   getBrandList().then((res) => (brandOptions.value = res.data.items));
 };
 
+const loadCustomers = () => {
+  getCustomerList({ page: 1, size: 500 }).then((res) => {
+    customerOptions.value = res.data.list;
+  });
+};
 const resetQuery = () => {
   Object.assign(queryForm, { page: 1, size: 10, brand: "", model: "", dateRange: [] });
   loadData();
@@ -136,6 +162,7 @@ const resetQuery = () => {
 onMounted(() => {
   loadData();
   loadBrands();
+  loadCustomers(); // 页面加载时抓取客户
 });
 </script>
 

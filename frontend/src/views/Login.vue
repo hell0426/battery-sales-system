@@ -8,7 +8,8 @@
           alt="logo"
           style="width: 50px"
         />
-        <h2>电瓶管家 Pro</h2>
+        <h2>电瓶进销存与</h2>
+        <h2>挂账管理系统</h2>
         <p class="sub-title">分级管理系统入口</p>
       </div>
 
