@@ -91,15 +91,16 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination-area">
-        <el-pagination
-          v-model:current-page="queryForm.page"
-          v-model:page-size="queryForm.size"
-          :total="total"
-          layout="total, prev, pager, next"
-          @current-change="loadData"
-        />
-      </div>
+      <el-pagination
+        v-model:current-page="queryForm.page"
+        v-model:page-size="queryForm.size"
+        :page-sizes="[10, 20, 50, 100]"
+        :total="total"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @size-change="loadData"
+        @current-change="loadData"
+      />
     </el-card>
 
     <!-- 3. 新增/编辑 弹窗 (补全了这部分) -->
@@ -320,3 +321,8 @@ onMounted(() => {
   loadData();
 });
 </script>
+<style scoped>
+.el-pagination {
+  margin-top: 40px;
+}
+</style>
