@@ -22,6 +22,10 @@ request.interceptors.request.use(
 // 3. 响应拦截器 (统一处理你后端的 RespBean)
 request.interceptors.response.use(
     response => {
+         // 关键修改：如果是文件流（Blob），直接返回，不要判断 code
+        if (response.data instanceof Blob) {
+            return response.data;
+        }
         // response.data 就是你后端返回的 RespBean: {code: 200, msg: "成功", data: {...}}
         let res = response.data;
         

@@ -125,6 +125,7 @@ const handleLogin = () => {
 
           //存入本地缓存，供 Layout 和权限校验使用
           localStorage.setItem("userRole", userInfo.role);
+          localStorage.setItem("userId", userInfo.id);
           localStorage.setItem("realName", userInfo.realName);
           localStorage.setItem("username", userInfo.username);
 

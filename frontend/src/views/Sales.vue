@@ -224,6 +224,7 @@ const handleSubmit = () => {
   submitting.value = true;
   const data = {
     customerId: customerId.value,
+    userId: localStorage.getItem("userId"),
     status: payStatus.value,
     items: cartList.value.map((item) => ({
       productId: item.id,

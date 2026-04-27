@@ -91,6 +91,14 @@ public class OrdersController {
         // 2. 构造查询条件
         QueryWrapper<OrderItem> wrapper = new QueryWrapper<>();
 
+        // 核心数据权限逻辑开始
+        // 如果传过来的角色是 staff（员工），强制加上 user_id 过滤
+        if ("staff".equals(vo.getRole())) {
+            wrapper.eq("o.user_id", vo.getUserId());
+        }
+        // 如果是 admin，则不加这个 eq 条件，即查询全部
+        // 核心数据权限逻辑结束
+
         // 按品牌筛选
         if (StringUtils.hasText(vo.getBrand())) {
             wrapper.like("product_name", vo.getBrand()); // 之前明细表存了"品牌-型号"快照
@@ -102,6 +110,11 @@ public class OrdersController {
         // 增加客户姓名过滤 (注意这里 c 是 customer 表的别名)
         if (StringUtils.hasText(vo.getCustomerName())) {
             wrapper.like("c.name", vo.getCustomerName());
+        }
+        // 销售员姓名筛选 ---
+        // 注意：这里的 "u.real_name" 必须对应你在 Mapper SQL 里给 sys_user 表起的别名 'u'
+        if (StringUtils.hasText(vo.getUserName())) {
+            wrapper.like("u.real_name", vo.getUserName());
         }
         // 核心：按日期范围筛选（利用子查询关联 orders 表的时间）
         if (vo.getDateRange() != null && vo.getDateRange().size() == 2) {

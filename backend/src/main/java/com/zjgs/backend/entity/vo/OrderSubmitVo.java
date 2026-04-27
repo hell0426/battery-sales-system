@@ -8,6 +8,7 @@ public class OrderSubmitVo {
     // 客户ID
     private Integer customerId;
     // 支付状态 (paid:现结, debt:挂账)
+    private Integer userId; //接收员工ID
     private String status;
     // 买了哪些东西？(是一个列表)
     private List<OrderItemVo> items;

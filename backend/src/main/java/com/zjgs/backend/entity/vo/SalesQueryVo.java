@@ -12,4 +12,8 @@ public class SalesQueryVo {
     private String model;      // 型号
     private String customerName; // 客户名称
     private List<String> dateRange; // 前端传来的 [开始日期, 结束日期]
+
+    private String role;   // 角色：admin 或 staff
+    private Integer userId; // 当前登录用户的ID
+    private String userName;
 }

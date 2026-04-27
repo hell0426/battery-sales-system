@@ -80,4 +80,11 @@ public class Orders implements Serializable {
     @TableField("is_deleted")
     @Schema(description = "逻辑删除(1:已删, 0:未删)")
     private Integer isDeleted;
+
+    /**
+     * 开单员工ID
+     */
+    @TableField("user_id") // 必须加上这个注解，告诉 MyBatis-Plus 对应数据库的 user_id 列
+    @io.swagger.v3.oas.annotations.media.Schema(description = "开单员工ID")
+    private Integer userId;
 }

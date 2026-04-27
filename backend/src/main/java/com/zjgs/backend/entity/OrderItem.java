@@ -83,4 +83,8 @@ public class OrderItem implements Serializable {
     @TableField(exist = false) // 表示数据库里没这一列，只是查询结果显示用
     @Schema(description = "客户名称")
     private String customerName;
+
+    @TableField(exist = false)
+    @Schema(description = "销售员(员工姓名)")
+    private String userName; // 对应 sys_user 表里的 real_name
 }

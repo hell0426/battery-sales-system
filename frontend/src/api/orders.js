@@ -36,3 +36,13 @@ export function getSalesStats(data) {
         data
     })
 }
+
+//excel
+export function exportSalesExcel(data) {
+    return request({
+        url: '/orderItem/stats/export',
+        method: 'post',
+        data,
+        responseType: 'blob' // 告诉axios这是文件流
+    })
+}

@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 24/04/2026 17:37:54
+ Date: 27/04/2026 17:50:40
 */
 
 SET NAMES utf8mb4;
@@ -30,7 +30,7 @@ CREATE TABLE `brand`  (
 -- ----------------------------
 -- Records of brand
 -- ----------------------------
-INSERT INTO `brand` VALUES (1, '风帆');
+INSERT INTO `brand` VALUES (1, '风帆f');
 INSERT INTO `brand` VALUES (2, '骆驼');
 INSERT INTO `brand` VALUES (3, '瓦尔塔');
 INSERT INTO `brand` VALUES (4, '天能');
@@ -73,7 +73,7 @@ CREATE TABLE `order_item`  (
   `price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '成交单价',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 14 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of order_item
@@ -90,6 +90,7 @@ INSERT INTO `order_item` VALUES (9, 8, 4, '瓦尔塔 - L2-400', 2, 550.00, '2026
 INSERT INTO `order_item` VALUES (10, 9, 2, '风帆 - 12V-100AH', 3, 700.00, '2026-04-24 14:31:51');
 INSERT INTO `order_item` VALUES (11, 10, 1, '风帆 - 6-QW-45(390)-L', 1, 350.00, '2026-04-24 14:31:51');
 INSERT INTO `order_item` VALUES (12, 11, 6, '天能 (Tianneng) - 6-DZM-12', 3, 260.00, '2026-04-24 15:36:16');
+INSERT INTO `order_item` VALUES (13, 12, 9, '风帆f - 12V-100AHH', 1, 650.00, '2026-04-24 18:03:19');
 
 -- ----------------------------
 -- Table structure for orders
@@ -103,23 +104,25 @@ CREATE TABLE `orders`  (
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '销售时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NULL DEFAULT 0 COMMENT '逻辑删除(1:已删, 0:未删)',
+  `user_id` int NULL DEFAULT NULL COMMENT '开单员工ID',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 12 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 13 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of orders
 -- ----------------------------
-INSERT INTO `orders` VALUES (1, 1, 350.00, 'paid', '2026-02-05 14:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (2, 2, 1200.00, 'paid', '2026-02-15 09:30:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (3, 3, 2400.00, 'paid', '2026-03-05 10:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (4, 4, 840.00, 'debt', '2026-03-12 16:20:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (5, 2, 1500.00, 'paid', '2026-03-25 11:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (6, 5, 680.00, 'debt', '2026-04-05 15:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (7, 1, 700.00, 'paid', '2026-04-10 13:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (8, 3, 1100.00, 'paid', '2026-04-18 09:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (9, 2, 2100.00, 'debt', '2026-04-22 14:00:00', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (10, 1, 350.00, 'paid', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
-INSERT INTO `orders` VALUES (11, 4, 780.00, 'debt', '2026-04-24 15:36:16', '2026-04-24 15:36:16', 0);
+INSERT INTO `orders` VALUES (1, 1, 350.00, 'paid', '2026-02-05 14:00:00', '2026-04-27 17:11:20', 0, 1);
+INSERT INTO `orders` VALUES (2, 2, 1200.00, 'paid', '2026-02-15 09:30:00', '2026-04-27 17:11:20', 0, 1);
+INSERT INTO `orders` VALUES (3, 3, 2400.00, 'paid', '2026-03-05 10:00:00', '2026-04-27 17:11:20', 0, 1);
+INSERT INTO `orders` VALUES (4, 4, 840.00, 'debt', '2026-03-12 16:20:00', '2026-04-27 17:11:20', 0, 1);
+INSERT INTO `orders` VALUES (5, 2, 1500.00, 'paid', '2026-03-25 11:00:00', '2026-04-27 17:11:20', 0, 1);
+INSERT INTO `orders` VALUES (6, 5, 680.00, 'debt', '2026-04-05 15:00:00', '2026-04-27 17:11:20', 0, 2);
+INSERT INTO `orders` VALUES (7, 1, 700.00, 'paid', '2026-04-10 13:00:00', '2026-04-27 17:11:20', 0, 2);
+INSERT INTO `orders` VALUES (8, 3, 1100.00, 'paid', '2026-04-18 09:00:00', '2026-04-27 17:11:20', 0, 2);
+INSERT INTO `orders` VALUES (9, 2, 2100.00, 'debt', '2026-04-22 14:00:00', '2026-04-27 17:11:20', 0, 2);
+INSERT INTO `orders` VALUES (10, 1, 350.00, 'paid', '2026-04-24 14:31:51', '2026-04-27 17:11:20', 0, 2);
+INSERT INTO `orders` VALUES (11, 4, 780.00, 'debt', '2026-04-24 15:36:16', '2026-04-27 17:11:20', 0, 3);
+INSERT INTO `orders` VALUES (12, 2, 650.00, 'debt', '2026-04-24 18:03:19', '2026-04-27 17:11:20', 0, 3);
 
 -- ----------------------------
 -- Table structure for product
@@ -148,7 +151,7 @@ INSERT INTO `product` VALUES (5, 800.00, 1200.00, 15, '2026-03-01 10:00:00', '20
 INSERT INTO `product` VALUES (6, 150.00, 260.00, 97, '2026-03-05 10:00:00', '2026-04-24 14:31:51', 0, 6);
 INSERT INTO `product` VALUES (7, 180.00, 310.00, 3, '2026-04-01 10:00:00', '2026-04-24 14:31:51', 0, 7);
 INSERT INTO `product` VALUES (8, 220.00, 360.00, 25, '2026-04-24 10:00:00', '2026-04-24 17:20:16', 0, 1);
-INSERT INTO `product` VALUES (9, 430.00, 650.00, 15, '2026-04-24 10:10:00', '2026-04-24 17:20:16', 0, 2);
+INSERT INTO `product` VALUES (9, 430.00, 650.00, 14, '2026-04-24 10:10:00', '2026-04-24 17:20:16', 0, 2);
 INSERT INTO `product` VALUES (10, 290.00, 410.00, 40, '2026-04-24 10:20:00', '2026-04-24 17:20:16', 0, 3);
 INSERT INTO `product` VALUES (11, 330.00, 520.00, 12, '2026-04-24 10:30:00', '2026-04-24 17:20:16', 0, 4);
 INSERT INTO `product` VALUES (12, 750.00, 1100.00, 8, '2026-04-24 10:40:00', '2026-04-24 17:20:16', 0, 5);

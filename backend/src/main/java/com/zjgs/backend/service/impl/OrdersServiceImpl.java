@@ -76,6 +76,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         // 6. 保存订单主表
         Orders orders = new Orders();
         orders.setCustomerId(vo.getCustomerId());
+        orders.setUserId(vo.getUserId());
         orders.setTotalAmount(totalAmount);
         orders.setStatus(vo.getStatus());
         this.save(orders);
