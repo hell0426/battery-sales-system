@@ -12,7 +12,7 @@ public class OrderSubmitVo {
     private String status;
     // 买了哪些东西？(是一个列表)
     private List<OrderItemVo> items;
-
+    private Double discountAmount;
     // 内部类：定义购物车里的每一项
     @Data
     public static class OrderItemVo {

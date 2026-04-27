@@ -96,8 +96,27 @@
           </el-table>
 
           <div class="checkout-area">
+            <div class="total-price" style="font-size: 14px; color: #999">
+              商品总价：<span>¥{{ totalAmount }}</span>
+            </div>
+            <!-- 新增：折扣输入框 -->
+            <el-form-item label="优惠折让" style="margin-top: 10px">
+              <el-input-number
+                v-model="discountAmount"
+                :controls="false"
+                :min="0"
+                :max="totalAmount"
+                size="small"
+                :disabled="cartList.length === 0"
+                placeholder="输入优惠金额"
+              />
+            </el-form-item>
+
+            <!-- 新增：最终实收显示 -->
             <div class="total-price">
-              总金额：<span>¥{{ totalAmount }}</span>
+              最终应收：<span style="color: #67c23a"
+                >¥ {{ (totalAmount - discountAmount).toFixed(2) }}</span
+              >
             </div>
             <el-form label-width="70px" size="default">
               <el-form-item label="客户">
@@ -153,6 +172,8 @@ const customerId = ref(null);
 const payStatus = ref("paid");
 const submitting = ref(false);
 const activeBrand = ref("");
+// 1. 定义折扣变量
+const discountAmount = ref(0);
 
 // 分组逻辑改为识别 brandName 和 modelName
 const groupedProducts = computed(() => {
@@ -225,6 +246,7 @@ const handleSubmit = () => {
   const data = {
     customerId: customerId.value,
     userId: localStorage.getItem("userId"),
+    discountAmount: discountAmount.value, //  传给后端
     status: payStatus.value,
     items: cartList.value.map((item) => ({
       productId: item.id,
@@ -236,6 +258,7 @@ const handleSubmit = () => {
     .then(() => {
       ElMessage.success("开单成功！");
       cartList.value = [];
+      discountAmount.value = 0; // 成功后重置折扣
       loadProducts();
       submitting.value = false;
     })

@@ -1,7 +1,7 @@
 <template>
   <div class="settlement-container">
     <el-row :gutter="20">
-      <!-- 左侧：订单列表 (占 10 份宽度) -->
+      <!-- 左侧：订单列表 -->
       <el-col :span="10">
         <el-card shadow="never" class="list-card">
           <template #header>
@@ -26,20 +26,19 @@
             @row-click="handleRowClick"
             style="cursor: pointer"
           >
-            <el-table-column label="客户/金额">
+            <el-table-column label="客户/实收金额">
               <template #default="scope">
                 <div style="font-weight: bold">
                   {{ getCustomerName(scope.row.customerId) }}
                 </div>
                 <div style="color: #f56c6c; font-size: 12px">
-                  ¥{{ scope.row.totalAmount }}
+                  实收: ¥{{ scope.row.totalAmount }}
                 </div>
               </template>
             </el-table-column>
             <el-table-column prop="createTime" label="日期" width="100">
               <template #default="scope">
-                {{ scope.row.createTime.substring(5, 10) }}
-                <!-- 只显示月-日 -->
+                {{ scope.row.createTime ? scope.row.createTime.substring(5, 10) : "" }}
               </template>
             </el-table-column>
           </el-table>
@@ -55,7 +54,7 @@
         </el-card>
       </el-col>
 
-      <!-- 右侧：订单详情 (占 14 份宽度) -->
+      <!-- 右侧：订单详情 -->
       <el-col :span="14">
         <el-card v-if="currentOrder.id" shadow="never" class="detail-card">
           <template #header>
@@ -71,29 +70,64 @@
             </div>
           </template>
 
-          <div class="order-info">
-            <p>
-              <strong>客户名称：</strong>{{ getCustomerName(currentOrder.customerId) }}
-            </p>
-            <p><strong>下单时间：</strong>{{ currentOrder.createTime }}</p>
-            <p>
-              <strong>当前状态：</strong>
-              <el-tag :type="currentOrder.status === 'paid' ? 'success' : 'danger'">
-                {{ currentOrder.status === "paid" ? "已结清" : "挂账未付" }}
-              </el-tag>
-            </p>
+          <!-- 🔴 重点修改：订单概况展示 -->
+          <div class="order-info-box">
+            <el-descriptions :column="2" border>
+              <el-descriptions-item label="客户名称">{{
+                getCustomerName(currentOrder.customerId)
+              }}</el-descriptions-item>
+              <el-descriptions-item label="当前状态">
+                <el-tag :type="currentOrder.status === 'paid' ? 'success' : 'danger'">
+                  {{ currentOrder.status === "paid" ? "已结清" : "挂账未付" }}
+                </el-tag>
+              </el-descriptions-item>
+              <el-descriptions-item label="下单时间" :span="2">
+                {{
+                  currentOrder.createTime ? currentOrder.createTime.replace("T", " ") : ""
+                }}
+              </el-descriptions-item>
+            </el-descriptions>
           </div>
 
-          <el-table :data="detailList" border stripe style="margin-top: 20px">
+          <!-- 商品明细表格 -->
+          <el-table
+            :data="detailList"
+            border
+            stripe
+            style="margin-top: 20px"
+            size="small"
+          >
             <el-table-column prop="productName" label="电瓶型号" />
             <el-table-column prop="quantity" label="数量" width="80" align="center" />
-            <el-table-column prop="price" label="成交价">
+            <el-table-column prop="price" label="成交单价">
               <template #default="scope">¥{{ scope.row.price }}</template>
+            </el-table-column>
+            <el-table-column label="小计">
+              <template #default="scope"
+                >¥{{ (scope.row.price * scope.row.quantity).toFixed(2) }}</template
+              >
             </el-table-column>
           </el-table>
 
-          <div class="total-bar">
-            应收合计：<span>¥{{ currentOrder.totalAmount }}</span>
+          <!-- 🔴 重点修改：金额计算明细区 -->
+          <div class="money-summary">
+            <div class="summary-item">
+              <span>商品总价：</span>
+              <span
+                >¥
+                {{
+                  (currentOrder.totalAmount + currentOrder.discountAmount).toFixed(2)
+                }}</span
+              >
+            </div>
+            <div class="summary-item discount">
+              <span>优惠减免：</span>
+              <span>- ¥ {{ currentOrder.discountAmount.toFixed(2) }}</span>
+            </div>
+            <div class="summary-item final">
+              <span>实收合计：</span>
+              <span class="final-price">¥ {{ currentOrder.totalAmount.toFixed(2) }}</span>
+            </div>
           </div>
         </el-card>
 
@@ -108,19 +142,18 @@
 import { ref, reactive, onMounted } from "vue";
 import { getOrderList, settleOrder } from "@/api/orders";
 import { getCustomerList } from "@/api/customer";
-import { getItemsByOrderId } from "@/api/orderItem"; // 🔴 记得在 api 文件夹建这个
+import { getItemsByOrderId } from "@/api/orderItem";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const loading = ref(false);
 const tableData = ref([]);
 const total = ref(0);
 const customerMap = ref({});
-const detailList = ref([]); // 详情数据
-const currentOrder = ref({}); // 当前选中的订单对象
+const detailList = ref([]);
+const currentOrder = ref({});
 
 const queryForm = reactive({ page: 1, size: 10, status: "debt" });
 
-// 1. 加载客户映射
 const loadCustomers = async () => {
   const res = await getCustomerList({ page: 1, size: 1000 });
   res.data.list.forEach((c) => {
@@ -129,30 +162,29 @@ const loadCustomers = async () => {
 };
 const getCustomerName = (id) => customerMap.value[id] || "未知客户";
 
-// 2. 加载左侧列表
 const loadData = () => {
   loading.value = true;
   getOrderList(queryForm).then((res) => {
     tableData.value = res.data.list;
     total.value = res.data.total;
     loading.value = false;
-    // 自动清除右侧显示
     currentOrder.value = {};
     detailList.value = [];
   });
 };
 
-// 🔴 3. 点击左侧行，加载右侧明细
 const handleRowClick = (row) => {
   currentOrder.value = row;
+  // 确保折扣金额有默认值
+  if (!currentOrder.value.discountAmount) currentOrder.value.discountAmount = 0;
+
   getItemsByOrderId(row.id).then((res) => {
     detailList.value = res.data.items;
   });
 };
 
-// 4. 结账
 const handleSettle = (id) => {
-  ElMessageBox.confirm("确认收款？", "提示").then(() => {
+  ElMessageBox.confirm("确认已收到该笔款项？", "结账确认").then(() => {
     settleOrder(id).then(() => {
       ElMessage.success("结账成功");
       loadData();
@@ -176,24 +208,35 @@ onMounted(async () => {
   justify-content: space-between;
   align-items: center;
 }
-.list-card {
-  height: 80vh;
+.list-card,
+.detail-card {
+  height: calc(100vh - 120px);
   overflow-y: auto;
 }
-.detail-card {
-  height: 80vh;
-}
-.order-info p {
-  margin: 10px 0;
-  font-size: 14px;
-}
-.total-bar {
-  margin-top: 30px;
+
+/* 🔴 金额汇总区域样式 */
+.money-summary {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: #f8f9fb;
+  border-radius: 8px;
   text-align: right;
-  font-size: 18px;
+}
+.summary-item {
+  margin-bottom: 8px;
+  font-size: 14px;
+  color: #606266;
+}
+.discount {
+  color: #f56c6c;
+}
+.final {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid #e4e7ed;
   font-weight: bold;
 }
-.total-bar span {
+.final-price {
   color: #f56c6c;
   font-size: 24px;
 }

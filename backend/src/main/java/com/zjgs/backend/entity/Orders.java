@@ -87,4 +87,9 @@ public class Orders implements Serializable {
     @TableField("user_id") // 必须加上这个注解，告诉 MyBatis-Plus 对应数据库的 user_id 列
     @io.swagger.v3.oas.annotations.media.Schema(description = "开单员工ID")
     private Integer userId;
+    /**
+     * 折扣金额
+     */
+    @TableField("discount_amount")
+    private BigDecimal discountAmount;
 }

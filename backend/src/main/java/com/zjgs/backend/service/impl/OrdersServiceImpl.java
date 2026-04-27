@@ -20,8 +20,6 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private IProductService productService;
     @Autowired
     private IOrderItemService orderItemService;
-
-    // 🔴 必须注入这两个服务，用来查出品牌名和型号名
     @Autowired
     private IProductModelService productModelService;
     @Autowired
@@ -30,26 +28,32 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void createOrder(OrderSubmitVo vo) {
-        BigDecimal totalAmount = BigDecimal.ZERO;
+        // 1. 初始化商品总原价为 0
+        BigDecimal sumOfItems = BigDecimal.ZERO;
         List<OrderItem> saveItems = new ArrayList<>();
 
         for (OrderSubmitVo.OrderItemVo itemVo : vo.getItems()) {
-            // 1. 查库存
+            // 查产品信息
             Product product = productService.getById(itemVo.getProductId());
             if (product == null) {
                 throw new RuntimeException("商品ID " + itemVo.getProductId() + " 不存在");
             }
+            // 查库存
             if (product.getStock() < itemVo.getQuantity()) {
-                // 修正：原来这里用 getBrand()，现在改成用 ID 提示
                 throw new RuntimeException("商品(ID:" + product.getId() + ") 库存不足！");
             }
 
-            // 2. 扣库存
+            // 关键修正：计算这一项的小计并累加到总原价
+            BigDecimal price = BigDecimal.valueOf(itemVo.getPrice());
+            BigDecimal quantity = new BigDecimal(itemVo.getQuantity());
+            BigDecimal itemTotal = price.multiply(quantity); // 单价 * 数量
+            sumOfItems = sumOfItems.add(itemTotal); // 累加到总额
+
+            // 扣库存
             product.setStock(product.getStock() - itemVo.getQuantity());
             productService.updateById(product);
 
-            // 3. 关键步骤：获取型号名和品牌名做“快照”
-            // 既然 product 表没名字了，我们就去型号表和品牌表里拿
+            // 获取名字快照
             ProductModel pm = productModelService.getById(product.getModelId());
             String fullName = "未知型号";
             if (pm != null) {
@@ -57,31 +61,30 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
                 fullName = (b != null ? b.getName() : "") + " - " + pm.getName();
             }
 
-            // 4. 准备明细记录
+            // 准备明细记录
             OrderItem orderItem = new OrderItem();
             orderItem.setProductId(product.getId());
-            orderItem.setProductName(fullName); // 使用组合好的完整名字
+            orderItem.setProductName(fullName);
             orderItem.setQuantity(itemVo.getQuantity());
-
-            // 修正：BigDecimal 的推荐转换方式
-            BigDecimal salePrice = BigDecimal.valueOf(itemVo.getPrice());
-            orderItem.setPrice(salePrice);
+            orderItem.setPrice(price);
             saveItems.add(orderItem);
-
-            // 5. 累加金额
-            BigDecimal itemTotal = salePrice.multiply(new BigDecimal(orderItem.getQuantity()));
-            totalAmount = totalAmount.add(itemTotal);
         }
 
-        // 6. 保存订单主表
+        // 2. 计算折扣和最终实收
+        BigDecimal discount = BigDecimal.valueOf(vo.getDiscountAmount() != null ? vo.getDiscountAmount() : 0.0);
+        // 实收金额 = 商品原价总和 - 优惠金额
+        BigDecimal finalPayAmount = sumOfItems.subtract(discount);
+
+        // 3. 保存订单主表
         Orders orders = new Orders();
         orders.setCustomerId(vo.getCustomerId());
         orders.setUserId(vo.getUserId());
-        orders.setTotalAmount(totalAmount);
+        orders.setTotalAmount(finalPayAmount); // 存入扣除折扣后的【实收金额】
+        orders.setDiscountAmount(discount);    // 【折扣金额】也存进去
         orders.setStatus(vo.getStatus());
         this.save(orders);
 
-        // 7. 保存订单明细表
+        // 4. 保存订单明细表
         for (OrderItem item : saveItems) {
             item.setOrderId(orders.getId());
         }
