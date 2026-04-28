@@ -66,17 +66,30 @@ const router = createRouter({
 // 路由守卫：没登录跳回登录页
 
 router.beforeEach((to, from, next) => {
-  const role = localStorage.getItem("userRole")
+  const role = sessionStorage.getItem("userRole")
   
   // 1. 如果没登录且不是去登录页，强行跳到登录页
   if (!role && to.path !== '/login') {
     return next('/login')
   }
 
-  // 2. 权限限制：如果是员工(staff)想去老板的页面(仪表盘/对账)
-  const adminPages = ['/dashboard', '/settlement']
+  // 2. 权限限制：真正的老板专属页面（店员绝对不能进的）
+  const adminPages = [
+    '/dashboard',    // 经营仪表盘（涉及全店利润，店员不能看）
+    '/settlement',   // 月结对账（涉及钱款核销，店员不能看）
+    '/user',         // 员工管理
+    '/category'      // 品牌型号配置
+  ]
+
+  
+
   if (role === 'staff' && adminPages.includes(to.path)) {
-    return next('/product') // 员工乱闯就踢回库存页
+    return next('/product') // 只有店员乱闯老板页面时才踢回库存页
+  }
+
+  // 3. 已登录状态下访问登录页，直接送回主页
+  if (role && to.path === '/login') {
+    return next(role === 'admin' ? '/dashboard' : '/product')
   }
 
   next()

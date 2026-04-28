@@ -15,6 +15,11 @@ public class SalesExportVo {
     @ColumnWidth(20)
     private String customerName;
 
+    // Excel 显示销售员
+    @ExcelProperty("销售员")
+    @ColumnWidth(15)
+    private String userName;
+
     @ExcelProperty("商品名称")
     @ColumnWidth(30)
     private String productName;

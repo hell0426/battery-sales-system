@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 27/04/2026 18:27:33
+ Date: 28/04/2026 12:26:40
 */
 
 SET NAMES utf8mb4;
@@ -30,7 +30,7 @@ CREATE TABLE `brand`  (
 -- ----------------------------
 -- Records of brand
 -- ----------------------------
-INSERT INTO `brand` VALUES (1, '风帆f');
+INSERT INTO `brand` VALUES (1, '风帆');
 INSERT INTO `brand` VALUES (2, '骆驼');
 INSERT INTO `brand` VALUES (3, '瓦尔塔');
 INSERT INTO `brand` VALUES (4, '天能');
@@ -185,7 +185,7 @@ CREATE TABLE `product_model`  (
 -- Records of product_model
 -- ----------------------------
 INSERT INTO `product_model` VALUES (1, 1, '6-QW-45(390)-L');
-INSERT INTO `product_model` VALUES (2, 1, '12V-100AHH');
+INSERT INTO `product_model` VALUES (2, 1, '12V-100AH');
 INSERT INTO `product_model` VALUES (3, 2, '6-QW-60(450)-L');
 INSERT INTO `product_model` VALUES (4, 3, 'L2-400');
 INSERT INTO `product_model` VALUES (5, 3, 'AGM-H6');

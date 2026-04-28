@@ -109,7 +109,7 @@ import {
 } from "@/api/customer";
 import { ElMessage, ElMessageBox } from "element-plus";
 
-const userRole = localStorage.getItem("userRole");
+const userRole = sessionStorage.getItem("userRole");
 
 const loading = ref(false);
 const tableData = ref([]);

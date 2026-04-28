@@ -70,7 +70,7 @@
             </div>
           </template>
 
-          <!-- 🔴 重点修改：订单概况展示 -->
+          <!-- 重点修改：订单概况展示 -->
           <div class="order-info-box">
             <el-descriptions :column="2" border>
               <el-descriptions-item label="客户名称">{{
@@ -109,7 +109,7 @@
             </el-table-column>
           </el-table>
 
-          <!-- 🔴 重点修改：金额计算明细区 -->
+          <!-- 重点修改：金额计算明细区 -->
           <div class="money-summary">
             <div class="summary-item">
               <span>商品总价：</span>
@@ -214,7 +214,7 @@ onMounted(async () => {
   overflow-y: auto;
 }
 
-/* 🔴 金额汇总区域样式 */
+/* 金额汇总区域样式 */
 .money-summary {
   margin-top: 20px;
   padding: 20px;

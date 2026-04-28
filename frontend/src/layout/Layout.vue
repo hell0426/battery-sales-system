@@ -92,7 +92,7 @@ import { useRouter } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const router = useRouter();
-const role = localStorage.getItem("userRole"); // 获取角色给菜单用
+const role = sessionStorage.getItem("userRole"); // 获取角色给菜单用
 
 // 退出登录逻辑
 const handleLogout = () => {
@@ -102,9 +102,9 @@ const handleLogout = () => {
     type: "warning",
   }).then(() => {
     // 1. 清除本地存储的用户信息
-    localStorage.removeItem("userRole");
-    localStorage.removeItem("realName");
-    localStorage.removeItem("username");
+    sessionStorage.removeItem("userRole");
+    sessionStorage.removeItem("realName");
+    sessionStorage.removeItem("username");
 
     // 2. 提示并跳转到登录页
     ElMessage.success("退出成功");

@@ -245,7 +245,7 @@ const handleSubmit = () => {
   submitting.value = true;
   const data = {
     customerId: customerId.value,
-    userId: localStorage.getItem("userId"),
+    userId: sessionStorage.getItem("userId"),
     discountAmount: discountAmount.value, //  传给后端
     status: payStatus.value,
     items: cartList.value.map((item) => ({

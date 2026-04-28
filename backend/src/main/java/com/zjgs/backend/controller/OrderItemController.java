@@ -60,6 +60,10 @@ public class OrderItemController {
         if (StringUtils.hasText(vo.getBrand())) wrapper.like("oi.product_name", vo.getBrand());
         if (StringUtils.hasText(vo.getModel())) wrapper.like("oi.product_name", vo.getModel());
         if (StringUtils.hasText(vo.getCustomerName())) wrapper.like("c.name", vo.getCustomerName());
+        // 加上销售员的筛选
+        if (StringUtils.hasText(vo.getUserName())) {
+            wrapper.like("u.real_name", vo.getUserName());
+        }
         if (vo.getDateRange() != null && vo.getDateRange().size() == 2) {
             wrapper.between("o.create_time", vo.getDateRange().get(0) + " 00:00:00", vo.getDateRange().get(1) + " 23:59:59");
         }
@@ -72,10 +76,12 @@ public class OrderItemController {
             SalesExportVo exportVo = new SalesExportVo();
             exportVo.setId(item.getId());
             exportVo.setCustomerName(item.getCustomerName());
+            // 把查出来的员工名字塞进导出模型
+            exportVo.setUserName(item.getUserName());
             exportVo.setProductName(item.getProductName());
             exportVo.setPrice(item.getPrice());
             exportVo.setQuantity(item.getQuantity());
-            exportVo.setCreateTime(item.getCreateTime().toString());
+            exportVo.setCreateTime(item.getCreateTime().toString().replace("T", " "));
             return exportVo;
         }).toList();
 

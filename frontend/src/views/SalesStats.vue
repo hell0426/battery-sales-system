@@ -70,7 +70,7 @@
               </el-select>
             </el-form-item>
           </el-col>
-          <el-col :span="7" v-if="userRole === 'admin'">
+          <el-col :span="7" v-if="queryForm.role === 'admin'">
             <el-form-item label="销售员">
               <!-- 修正：确保老板能选所有人，员工只能看自己 -->
               <el-select
@@ -234,8 +234,8 @@ const handleExport = () => {
 
 const loadData = () => {
   // 从本地缓存同步身份信息
-  queryForm.userId = localStorage.getItem("userId");
-  queryForm.role = localStorage.getItem("userRole");
+  queryForm.userId = sessionStorage.getItem("userId");
+  queryForm.role = sessionStorage.getItem("userRole");
 
   loading.value = true;
   getSalesStats(queryForm)

@@ -196,7 +196,7 @@ const rules = {
 };
 
 // 拿到当前登录人的角色
-const userRole = localStorage.getItem("userRole");
+const userRole = sessionStorage.getItem("userRole");
 // --- 逻辑处理 ---
 
 // 1. 加载主列表
