@@ -11,7 +11,7 @@
  Target Server Version : 80037 (8.0.37)
  File Encoding         : 65001
 
- Date: 28/04/2026 12:26:40
+ Date: 28/04/2026 14:46:10
 */
 
 SET NAMES utf8mb4;
@@ -73,7 +73,7 @@ CREATE TABLE `order_item`  (
   `price` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '成交单价',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 16 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 19 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '订单明细表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of order_item
@@ -93,6 +93,9 @@ INSERT INTO `order_item` VALUES (12, 11, 6, '天能 (Tianneng) - 6-DZM-12', 3, 2
 INSERT INTO `order_item` VALUES (13, 12, 9, '风帆f - 12V-100AHH', 1, 650.00, '2026-04-24 18:03:19');
 INSERT INTO `order_item` VALUES (14, 13, 16, '风帆f - 12V-100AHH', 1, 690.00, '2026-04-27 18:12:26');
 INSERT INTO `order_item` VALUES (15, 14, 16, '风帆f - 12V-100AHH', 1, 690.00, '2026-04-27 18:22:01');
+INSERT INTO `order_item` VALUES (16, 15, 22, '风帆 - 6-QW-45(390)-L', 2, 335.00, '2026-04-28 13:06:20');
+INSERT INTO `order_item` VALUES (17, 16, 15, '风帆 - 6-QW-45(390)-L', 2, 345.00, '2026-04-28 13:17:38');
+INSERT INTO `order_item` VALUES (18, 17, 8, '风帆 - 6-QW-45(390)-L', 1, 360.00, '2026-04-28 13:18:41');
 
 -- ----------------------------
 -- Table structure for orders
@@ -109,7 +112,7 @@ CREATE TABLE `orders`  (
   `user_id` int NULL DEFAULT NULL COMMENT '开单员工ID',
   `discount_amount` decimal(10, 2) NULL DEFAULT 0.00 COMMENT '折扣金额',
   PRIMARY KEY (`id`) USING BTREE
-) ENGINE = InnoDB AUTO_INCREMENT = 15 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
+) ENGINE = InnoDB AUTO_INCREMENT = 18 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_general_ci COMMENT = '销售订单表' ROW_FORMAT = Dynamic;
 
 -- ----------------------------
 -- Records of orders
@@ -127,6 +130,9 @@ INSERT INTO `orders` VALUES (10, 1, 350.00, 'paid', '2026-04-24 14:31:51', '2026
 INSERT INTO `orders` VALUES (11, 4, 780.00, 'debt', '2026-04-24 15:36:16', '2026-04-27 17:11:20', 0, 3, 0.00);
 INSERT INTO `orders` VALUES (12, 2, 650.00, 'debt', '2026-04-24 18:03:19', '2026-04-27 17:11:20', 0, 3, 0.00);
 INSERT INTO `orders` VALUES (14, 3, 640.00, 'debt', '2026-04-27 18:22:01', '2026-04-27 18:22:01', 0, 1, 50.00);
+INSERT INTO `orders` VALUES (15, 4, 650.00, 'paid', '2026-04-28 13:06:20', '2026-04-28 13:06:20', 0, 1, 20.00);
+INSERT INTO `orders` VALUES (16, 5, 670.00, 'paid', '2026-04-28 13:17:38', '2026-04-28 13:17:38', 0, 2, 20.00);
+INSERT INTO `orders` VALUES (17, 2, 340.00, 'paid', '2026-04-28 13:18:41', '2026-04-28 13:18:41', 0, 2, 20.00);
 
 -- ----------------------------
 -- Table structure for product
@@ -154,21 +160,21 @@ INSERT INTO `product` VALUES (4, 320.00, 550.00, 8, '2026-02-15 10:00:00', '2026
 INSERT INTO `product` VALUES (5, 800.00, 1200.00, 15, '2026-03-01 10:00:00', '2026-04-24 14:31:51', 0, 5);
 INSERT INTO `product` VALUES (6, 150.00, 260.00, 97, '2026-03-05 10:00:00', '2026-04-24 14:31:51', 0, 6);
 INSERT INTO `product` VALUES (7, 180.00, 310.00, 3, '2026-04-01 10:00:00', '2026-04-24 14:31:51', 0, 7);
-INSERT INTO `product` VALUES (8, 220.00, 360.00, 25, '2026-04-24 10:00:00', '2026-04-24 17:20:16', 0, 1);
+INSERT INTO `product` VALUES (8, 220.00, 360.00, 24, '2026-04-24 10:00:00', '2026-04-24 17:20:16', 0, 1);
 INSERT INTO `product` VALUES (9, 430.00, 650.00, 14, '2026-04-24 10:10:00', '2026-04-24 17:20:16', 0, 2);
 INSERT INTO `product` VALUES (10, 290.00, 410.00, 40, '2026-04-24 10:20:00', '2026-04-24 17:20:16', 0, 3);
 INSERT INTO `product` VALUES (11, 330.00, 520.00, 12, '2026-04-24 10:30:00', '2026-04-24 17:20:16', 0, 4);
 INSERT INTO `product` VALUES (12, 750.00, 1100.00, 8, '2026-04-24 10:40:00', '2026-04-24 17:20:16', 0, 5);
 INSERT INTO `product` VALUES (13, 160.00, 280.00, 90, '2026-04-24 10:50:00', '2026-04-24 17:20:16', 0, 6);
 INSERT INTO `product` VALUES (14, 190.00, 320.00, 50, '2026-04-24 11:00:00', '2026-04-24 17:20:16', 0, 7);
-INSERT INTO `product` VALUES (15, 215.00, 345.00, 20, '2026-04-24 11:10:00', '2026-04-24 17:20:16', 0, 1);
+INSERT INTO `product` VALUES (15, 215.00, 345.00, 18, '2026-04-24 11:10:00', '2026-04-24 17:20:16', 0, 1);
 INSERT INTO `product` VALUES (16, 460.00, 690.00, 8, '2026-04-24 11:20:00', '2026-04-24 17:20:16', 0, 2);
 INSERT INTO `product` VALUES (17, 275.00, 405.00, 35, '2026-04-24 11:30:00', '2026-04-24 17:20:16', 0, 3);
 INSERT INTO `product` VALUES (18, 315.00, 515.00, 22, '2026-04-24 11:40:00', '2026-04-24 17:20:16', 0, 4);
 INSERT INTO `product` VALUES (19, 820.00, 1250.00, 5, '2026-04-24 11:50:00', '2026-04-24 17:20:16', 0, 5);
 INSERT INTO `product` VALUES (20, 140.00, 240.00, 100, '2026-04-24 12:00:00', '2026-04-24 17:20:16', 0, 6);
 INSERT INTO `product` VALUES (21, 170.00, 290.00, 45, '2026-04-24 12:10:00', '2026-04-24 17:20:16', 0, 7);
-INSERT INTO `product` VALUES (22, 205.00, 335.00, 30, '2026-04-24 12:20:00', '2026-04-24 17:20:16', 0, 1);
+INSERT INTO `product` VALUES (22, 205.00, 335.00, 28, '2026-04-24 12:20:00', '2026-04-24 17:20:16', 0, 1);
 
 -- ----------------------------
 -- Table structure for product_model

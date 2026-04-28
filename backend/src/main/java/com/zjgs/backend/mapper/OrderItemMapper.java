@@ -8,21 +8,15 @@ import com.zjgs.backend.entity.OrderItem;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
-
-
 /**
  * <p>
  * 订单明细表 Mapper 接口
  * </p>
- *
- * @author Luke
- * @since 2026-02-24
  */
 public interface OrderItemMapper extends BaseMapper<OrderItem> {
-    // 核心 SQL：四表联查 (明细+订单+客户+型号)
-    // 逻辑：从明细表出发，关联订单表拿到客户ID，再关联客户表拿到名字
-    // 1. 分页统计方法 (确保这里也有 u.real_name 别名，否则表格显示不出名字)
-    @Select("SELECT oi.*, c.name as customerName, u.real_name as userName " +
+
+    // 1. 分页统计方法
+    @Select("SELECT oi.*, c.name as customerName, u.real_name as userName, o.discount_amount as discountAmount " + // 重点：结尾加了空格
             "FROM order_item oi " +
             "JOIN orders o ON oi.order_id = o.id " +
             "JOIN customer c ON o.customer_id = c.id " +
@@ -30,12 +24,12 @@ public interface OrderItemMapper extends BaseMapper<OrderItem> {
             "${ew.customSqlSegment}")
     Page<OrderItem> selectSalesStatsPage(Page<OrderItem> page, @Param(Constants.WRAPPER) Wrapper query);
 
-    // 2. 修正：带 JOIN 的总金额统计方法 (之前漏掉了 sys_user 表)
-    @Select("SELECT SUM(oi.price * oi.quantity) " +
+    // 2. 总金额统计方法 (注意：这里直接查订单表的实收金额更准确)
+    @Select("SELECT SUM(o.total_amount) " +
             "FROM order_item oi " +
             "JOIN orders o ON oi.order_id = o.id " +
             "JOIN customer c ON o.customer_id = c.id " +
-            "LEFT JOIN sys_user u ON o.user_id = u.id " + // 加上这一行！
+            "LEFT JOIN sys_user u ON o.user_id = u.id " +
             "${ew.customSqlSegment}")
     Double selectSumAmount(@Param(Constants.WRAPPER) Wrapper query);
 }

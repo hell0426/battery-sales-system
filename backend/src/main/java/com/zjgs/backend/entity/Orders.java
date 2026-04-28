@@ -6,6 +6,7 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -22,9 +23,7 @@ import java.time.LocalDateTime;
  * @author Luke
  * @since 2026-02-24
  */
-@Getter
-@Setter
-@ToString
+@Data
 @TableName("orders")
 @Schema(name = "Orders", description = "销售订单表")
 public class Orders implements Serializable {

@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -21,9 +22,7 @@ import java.time.LocalDateTime;
  * @author Luke
  * @since 2026-02-24
  */
-@Getter
-@Setter
-@ToString
+@Data
 @TableName("order_item")
 @Schema(name = "OrderItem", description = "订单明细表")
 public class OrderItem implements Serializable {
@@ -87,4 +86,10 @@ public class OrderItem implements Serializable {
     @TableField(exist = false)
     @Schema(description = "销售员(员工姓名)")
     private String userName; // 对应 sys_user 表里的 real_name
+
+
+    @TableField(exist = false)
+    @Schema(description = "优惠金额")
+    private BigDecimal discountAmount;
+
 }

@@ -15,9 +15,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -57,6 +59,10 @@ public class OrderItemController {
 
         // 2. 获取符合条件的所有数据（不分页，查全部）
         QueryWrapper<OrderItem> wrapper = new QueryWrapper<>();
+        // 数据权限：如果是员工，强制只导出他自己的订单
+        if ("staff".equals(vo.getRole())) {
+            wrapper.eq("o.user_id", vo.getUserId());
+        }
         if (StringUtils.hasText(vo.getBrand())) wrapper.like("oi.product_name", vo.getBrand());
         if (StringUtils.hasText(vo.getModel())) wrapper.like("oi.product_name", vo.getModel());
         if (StringUtils.hasText(vo.getCustomerName())) wrapper.like("c.name", vo.getCustomerName());
@@ -81,10 +87,53 @@ public class OrderItemController {
             exportVo.setProductName(item.getProductName());
             exportVo.setPrice(item.getPrice());
             exportVo.setQuantity(item.getQuantity());
+            // 核心计算逻辑
+            // 1. 原价小计 = 单价 * 数量
+            BigDecimal original = item.getPrice().multiply(new BigDecimal(item.getQuantity()));
+            exportVo.setOriginalTotal(original);
+
+            // 2. 优惠金额 (直接从 item 拿，item 是 Mapper 查出来的)
+            BigDecimal discount = item.getDiscountAmount() != null ? item.getDiscountAmount() : BigDecimal.ZERO;
+            exportVo.setDiscountAmount(discount);
+
+            // 3. 实收金额 = 原价小计 - 优惠
+            exportVo.setFinalAmount(original.subtract(discount));
+
             exportVo.setCreateTime(item.getCreateTime().toString().replace("T", " "));
             return exportVo;
-        }).toList();
+        }).collect(Collectors.toList());
 
+        // 手动计算并追加“合计行” ---
+        if (exportList != null && !exportList.isEmpty()) {
+            int totalQuantity = 0;
+            BigDecimal totalOriginal = BigDecimal.ZERO;
+            BigDecimal totalDiscount = BigDecimal.ZERO;
+            BigDecimal totalFinal = BigDecimal.ZERO;
+
+            // 1. 遍历当前列表进行累加
+            for (SalesExportVo item : exportList) {
+                totalQuantity += (item.getQuantity() != null ? item.getQuantity() : 0);
+                totalOriginal = totalOriginal.add(item.getOriginalTotal() != null ? item.getOriginalTotal() : BigDecimal.ZERO);
+                totalDiscount = totalDiscount.add(item.getDiscountAmount() != null ? item.getDiscountAmount() : BigDecimal.ZERO);
+                totalFinal = totalFinal.add(item.getFinalAmount() != null ? item.getFinalAmount() : BigDecimal.ZERO);
+            }
+
+            // 2. 创建一个专门的“合计”行对象
+            SalesExportVo totalRow = new SalesExportVo();
+            totalRow.setCustomerName("【全部合计】"); // 写在客户列，比较醒目
+            totalRow.setUserName("-");
+            totalRow.setProductName("-");
+            totalRow.setPrice(null); // 单价不需要合计
+            totalRow.setQuantity(totalQuantity);
+            totalRow.setOriginalTotal(totalOriginal);
+            totalRow.setDiscountAmount(totalDiscount);
+            totalRow.setFinalAmount(totalFinal);
+            totalRow.setCreateTime("-");
+
+            // 3. 将合计行追加到列表末尾
+            exportList.add(totalRow);
+        }
+        // --- 合计行逻辑结束 ---
         // 4. 写出到响应流
         EasyExcel.write(response.getOutputStream(), SalesExportVo.class)
                 .sheet("销售统计数据")

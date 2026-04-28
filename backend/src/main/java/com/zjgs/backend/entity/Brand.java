@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -19,9 +20,7 @@ import java.io.Serializable;
  * @author Luke
  * @since 2026-04-22
  */
-@Getter
-@Setter
-@ToString
+@Data
 @TableName("brand")
 @Schema(name = "Brand", description = "")
 public class Brand implements Serializable {

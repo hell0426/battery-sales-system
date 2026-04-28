@@ -136,11 +136,30 @@
           <template #default="scope">¥{{ scope.row.price }}</template>
         </el-table-column>
         <el-table-column prop="quantity" label="数量" width="100" align="center" />
-        <el-table-column label="小计" width="120">
+        <!-- 1. 显示原价小计 (不含折扣) -->
+        <el-table-column label="原价小计" width="100">
           <template #default="scope">
-            <span style="font-weight: bold; color: #f56c6c"
-              >¥{{ (scope.row.price * scope.row.quantity).toFixed(2) }}</span
-            >
+            ¥{{ (scope.row.price * scope.row.quantity).toFixed(2) }}
+          </template>
+        </el-table-column>
+        <!-- 2. 显示订单优惠金额 -->
+        <el-table-column prop="discountAmount" label="订单优惠" width="100">
+          <template #default="scope">
+            <span style="color: #f56c6c">-¥{{ scope.row.discountAmount || 0 }}</span>
+          </template>
+        </el-table-column>
+        <!-- 3. 最终显示的成交小计 -->
+        <el-table-column label="实收金额" width="110">
+          <template #default="scope">
+            <span style="font-weight: bold; color: #67c23a">
+              <!-- 逻辑：(单价 * 数量) - 优惠金额 -->
+              ¥{{
+                (
+                  scope.row.price * scope.row.quantity -
+                  (scope.row.discountAmount || 0)
+                ).toFixed(2)
+              }}
+            </span>
           </template>
         </el-table-column>
         <el-table-column prop="createTime" label="成交时间" width="180">
@@ -201,15 +220,16 @@ const getSummaries = (param) => {
       sums[index] = "合计";
       return;
     }
-    if (column.label === "数量" || column.label === "小计") {
-      const values = data.map((item) => {
-        if (column.label === "小计") return Number(item.price * item.quantity);
-        return Number(item[column.property]);
-      });
-      if (!values.every((value) => isNaN(value))) {
-        const res = values.reduce((prev, curr) => prev + curr, 0);
-        sums[index] = column.label === "小计" ? "¥ " + res.toFixed(2) : res;
-      }
+    // 对“数量”、“实收金额”等列进行求和
+    if (column.label === "数量") {
+      const values = data.map((item) => Number(item.quantity));
+      sums[index] = values.reduce((prev, curr) => prev + curr, 0);
+    } else if (column.label === "实收金额") {
+      const values = data.map((item) =>
+        Number(item.price * item.quantity - (item.discountAmount || 0)),
+      );
+      const res = values.reduce((prev, curr) => prev + curr, 0);
+      sums[index] = "¥ " + res.toFixed(2);
     } else {
       sums[index] = "";
     }

@@ -32,6 +32,18 @@ public class SalesExportVo {
     @ColumnWidth(10)
     private Integer quantity;
 
+    // 1. 新增：原价小计 (不含折扣)
+    @ExcelProperty("原价小计")
+    private BigDecimal originalTotal;
+
+    // 2. 新增：订单优惠金额
+    @ExcelProperty("订单优惠")
+    private BigDecimal discountAmount;
+
+    // 3. 新增：最终实收金额
+    @ExcelProperty("实收金额")
+    private BigDecimal finalAmount;
+
     @ExcelProperty("成交时间")
     @ColumnWidth(25)
     private String createTime;
