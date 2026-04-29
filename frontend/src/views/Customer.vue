@@ -13,7 +13,6 @@
           <el-button type="primary" icon="Search" @click="loadData">查询</el-button>
           <el-button icon="Refresh" @click="resetQuery">重置</el-button>
           <el-button
-            v-if="userRole === 'admin'"
             type="success"
             icon="Plus"
             @click="handleAdd"
