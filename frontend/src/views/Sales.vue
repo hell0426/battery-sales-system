@@ -108,25 +108,11 @@
               客户尊享价（{{ (customerDiscountRate * 100).toFixed(0) }}折）：
               <span>¥{{ (totalAmount * customerDiscountRate).toFixed(2) }}</span>
             </div>
-            <!-- 折扣输入框 -->
-            <el-form-item label="优惠折让" style="margin-top: 10px">
-              <el-input-number
-                v-model="discountAmount"
-                :controls="false"
-                :min="0"
-                :max="totalAmount"
-                size="small"
-                :disabled="cartList.length === 0"
-                placeholder="输入优惠金额"
-              />
-            </el-form-item>
             <!-- 最终实收显示 -->
             <div class="total-price">
               最终应收：<span style="color: #67c23a"
                 >¥
-                {{
-                  (totalAmount * customerDiscountRate - discountAmount).toFixed(2)
-                }}</span
+                {{ (totalAmount * customerDiscountRate).toFixed(2) }}</span
               >
             </div>
             <el-form label-width="70px" size="default">
@@ -183,8 +169,6 @@ const customerId = ref(null);
 const payStatus = ref("paid");
 const submitting = ref(false);
 const activeBrand = ref("");
-// 1. 定义折扣变量
-const discountAmount = ref(0);
 // 客户折扣率（选择客户时自动获取）
 const customerDiscountRate = ref(1);
 
@@ -269,7 +253,7 @@ const handleSubmit = () => {
   const data = {
     customerId: customerId.value,
     userId: sessionStorage.getItem("userId"),
-    discountAmount: discountAmount.value, //  传给后端
+    discountAmount: 0,
     status: payStatus.value,
     items: cartList.value.map((item) => ({
       productId: item.id,
@@ -281,7 +265,6 @@ const handleSubmit = () => {
     .then(() => {
       ElMessage.success("开单成功！");
       cartList.value = [];
-      discountAmount.value = 0; // 成功后重置折扣
       customerDiscountRate.value = 1; // 重置客户折扣率
       loadProducts();
       submitting.value = false;
