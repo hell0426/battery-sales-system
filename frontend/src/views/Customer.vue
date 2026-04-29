@@ -37,6 +37,12 @@
           </template>
         </el-table-column>
 
+        <el-table-column label="折扣率" width="100" align="center">
+          <template #default="scope">
+            <el-tag type="success">{{ (scope.row.discountRate || 1).toFixed(2) }}</el-tag>
+          </template>
+        </el-table-column>
+
         <el-table-column prop="createTime" label="注册时间" />
 
         <el-table-column v-if="userRole === 'admin'" label="操作" width="180">
@@ -89,6 +95,19 @@
             <el-option label="合作汽修厂 (可挂账)" value="shop" />
           </el-select>
         </el-form-item>
+        <el-form-item label="折扣率">
+          <el-input-number
+            v-model="form.discountRate"
+            :step="0.05"
+            :min="0.1"
+            :max="1.0"
+            :precision="2"
+            style="width: 100%"
+          />
+          <div style="color: #909399; font-size: 12px; line-height: 1.5">
+            1.00 代表原价，0.85 代表 85 折
+          </div>
+        </el-form-item>
       </el-form>
       <template #footer>
         <el-button @click="dialogVisible = false">取消</el-button>
@@ -118,7 +137,7 @@ const dialogTitle = ref("");
 const formRef = ref(null);
 
 const queryForm = reactive({ page: 1, size: 10, name: "", phone: "" });
-const form = reactive({ id: null, name: "", phone: "", type: "individual" });
+const form = reactive({ id: null, name: "", phone: "", type: "individual", discountRate: 1.0 });
 
 const rules = {
   name: [{ required: true, message: "请输入名称", trigger: "blur" }],
@@ -146,7 +165,7 @@ const resetQuery = () => {
 
 const handleAdd = () => {
   dialogTitle.value = "新增客户";
-  Object.assign(form, { id: null, name: "", phone: "", type: "individual" });
+  Object.assign(form, { id: null, name: "", phone: "", type: "individual", discountRate: 1.0 });
   dialogVisible.value = true;
 };
 

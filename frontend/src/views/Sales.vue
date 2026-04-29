@@ -96,10 +96,19 @@
           </el-table>
 
           <div class="checkout-area">
+            <!-- 三行金额展示：原价 → 尊享价 → 最终应收 -->
             <div class="total-price" style="font-size: 14px; color: #999">
-              商品总价：<span>¥{{ totalAmount }}</span>
+              商品原价：<span>¥{{ totalAmount }}</span>
             </div>
-            <!-- 新增：折扣输入框 -->
+            <div
+              class="total-price"
+              style="font-size: 14px; color: #e6a23c"
+              v-if="customerDiscountRate < 1"
+            >
+              客户尊享价（{{ (customerDiscountRate * 100).toFixed(0) }}折）：
+              <span>¥{{ (totalAmount * customerDiscountRate).toFixed(2) }}</span>
+            </div>
+            <!-- 折扣输入框 -->
             <el-form-item label="优惠折让" style="margin-top: 10px">
               <el-input-number
                 v-model="discountAmount"
@@ -111,11 +120,13 @@
                 placeholder="输入优惠金额"
               />
             </el-form-item>
-
-            <!-- 新增：最终实收显示 -->
+            <!-- 最终实收显示 -->
             <div class="total-price">
               最终应收：<span style="color: #67c23a"
-                >¥ {{ (totalAmount - discountAmount).toFixed(2) }}</span
+                >¥
+                {{
+                  (totalAmount * customerDiscountRate - discountAmount).toFixed(2)
+                }}</span
               >
             </div>
             <el-form label-width="70px" size="default">
@@ -174,6 +185,8 @@ const submitting = ref(false);
 const activeBrand = ref("");
 // 1. 定义折扣变量
 const discountAmount = ref(0);
+// 客户折扣率（选择客户时自动获取）
+const customerDiscountRate = ref(1);
 
 // 分组逻辑改为识别 brandName 和 modelName
 const groupedProducts = computed(() => {
@@ -198,6 +211,16 @@ const groupedProducts = computed(() => {
 watch(groupedProducts, (newVal) => {
   if (!activeBrand.value && Object.keys(newVal).length > 0) {
     activeBrand.value = Object.keys(newVal)[0];
+  }
+});
+
+// 选择客户时，自动获取该客户的折扣率
+watch(customerId, (newVal) => {
+  if (newVal) {
+    const customer = customerList.value.find((c) => c.id === newVal);
+    customerDiscountRate.value = customer?.discountRate || 1;
+  } else {
+    customerDiscountRate.value = 1;
   }
 });
 
@@ -259,6 +282,7 @@ const handleSubmit = () => {
       ElMessage.success("开单成功！");
       cartList.value = [];
       discountAmount.value = 0; // 成功后重置折扣
+      customerDiscountRate.value = 1; // 重置客户折扣率
       loadProducts();
       submitting.value = false;
     })

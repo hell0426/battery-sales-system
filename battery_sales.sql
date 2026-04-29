@@ -45,6 +45,7 @@ CREATE TABLE `customer`  (
   `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '客户名/修理厂名',
   `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT NULL COMMENT '联系电话',
   `type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NULL DEFAULT 'individual' COMMENT '类型: individual(散客), shop(修理厂)',
+  `discount_rate` decimal(3,2) NULL DEFAULT 1.00 COMMENT '客户折扣率 (1.00=原价, 0.85=85折)',
   `create_time` datetime NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `update_time` datetime NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `is_deleted` int NULL DEFAULT 0 COMMENT '逻辑删除(1:已删, 0:未删)',
@@ -54,11 +55,11 @@ CREATE TABLE `customer`  (
 -- ----------------------------
 -- Records of customer
 -- ----------------------------
-INSERT INTO `customer` VALUES (1, '普通散客 (现金)', '无', 'individual', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
-INSERT INTO `customer` VALUES (2, '京东养车 (府前路店)', '13811112222', 'shop', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
-INSERT INTO `customer` VALUES (3, '途虎养车中心', '13933334444', 'shop', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
-INSERT INTO `customer` VALUES (4, '老王私家修理铺', '13555556666', 'shop', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
-INSERT INTO `customer` VALUES (5, '顺风快修', '13677778888', 'shop', '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `customer` VALUES (1, '普通散客 (现金)', '无', 'individual', 1.00, '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `customer` VALUES (2, '京东养车 (府前路店)', '13811112222', 'shop', 0.88, '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `customer` VALUES (3, '途虎养车中心', '13933334444', 'shop', 0.90, '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `customer` VALUES (4, '老王私家修理铺', '13555556666', 'shop', 0.95, '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
+INSERT INTO `customer` VALUES (5, '顺风快修', '13677778888', 'shop', 0.92, '2026-04-24 14:31:51', '2026-04-24 14:31:51', 0);
 
 -- ----------------------------
 -- Table structure for order_item

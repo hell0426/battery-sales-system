@@ -12,6 +12,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -56,6 +57,13 @@ public class Customer implements Serializable {
     @TableField("type")
     @Schema(description = "类型: individual(散客), shop(修理厂)")
     private String type;
+
+    /**
+     * 客户折扣率 (1.00代表原价，0.85代表85折)
+     */
+    @TableField("discount_rate")
+    @Schema(description = "客户折扣率 (1.00代表原价，0.85代表85折)")
+    private BigDecimal discountRate;
 
     /**
      * 创建时间

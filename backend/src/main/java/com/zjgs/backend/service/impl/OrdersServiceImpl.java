@@ -24,6 +24,8 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
     private IProductModelService productModelService;
     @Autowired
     private IBrandService brandService;
+    @Autowired
+    private ICustomerService customerService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -70,12 +72,21 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
             saveItems.add(orderItem);
         }
 
-        // 2. 计算折扣和最终实收
-        BigDecimal discount = BigDecimal.valueOf(vo.getDiscountAmount() != null ? vo.getDiscountAmount() : 0.0);
-        // 实收金额 = 商品原价总和 - 优惠金额
-        BigDecimal finalPayAmount = sumOfItems.subtract(discount);
+        // 2. 查询客户折扣率，计算客户尊享价
+        Customer customer = customerService.getById(vo.getCustomerId());
+        BigDecimal customerDiscountRate = BigDecimal.ONE; // 默认 1.00 = 原价，无折扣
+        if (customer != null && customer.getDiscountRate() != null) {
+            customerDiscountRate = customer.getDiscountRate();
+        }
+        // 客户尊享价 = 商品原价总和 × 客户折扣率
+        BigDecimal discountedAmount = sumOfItems.multiply(customerDiscountRate);
 
-        // 3. 保存订单主表
+        // 3. 计算最终实收金额
+        BigDecimal discount = BigDecimal.valueOf(vo.getDiscountAmount() != null ? vo.getDiscountAmount() : 0.0);
+        // 最终实收金额 = 客户尊享价 - 手动优惠金额
+        BigDecimal finalPayAmount = discountedAmount.subtract(discount);
+
+        // 4. 保存订单主表
         Orders orders = new Orders();
         orders.setCustomerId(vo.getCustomerId());
         orders.setUserId(vo.getUserId());
@@ -84,7 +95,7 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         orders.setStatus(vo.getStatus());
         this.save(orders);
 
-        // 4. 保存订单明细表
+        // 5. 保存订单明细表
         for (OrderItem item : saveItems) {
             item.setOrderId(orders.getId());
         }
