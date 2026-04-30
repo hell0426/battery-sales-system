@@ -108,6 +108,16 @@
               客户尊享价（{{ (customerDiscountRate * 100).toFixed(0) }}折）：
               <span>¥{{ (totalAmount * customerDiscountRate).toFixed(2) }}</span>
             </div>
+            <div
+              class="total-price"
+              style="font-size: 14px; color: #f56c6c"
+              v-if="customerDiscountRate < 1"
+            >
+              优惠金额：
+              <span style="font-size: 18px"
+                >-¥{{ discountAmount.toFixed(2) }}</span
+              >
+            </div>
             <!-- 最终实收显示 -->
             <div class="total-price">
               最终应收：<span style="color: #67c23a"
@@ -210,6 +220,10 @@ watch(customerId, (newVal) => {
 
 const totalAmount = computed(() => {
   return cartList.value.reduce((sum, item) => sum + item.quantity * item.sellingPrice, 0);
+});
+
+const discountAmount = computed(() => {
+  return totalAmount.value * (1 - customerDiscountRate.value);
 });
 
 const loadProducts = () => {
