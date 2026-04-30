@@ -78,20 +78,18 @@ public class OrdersServiceImpl extends ServiceImpl<OrdersMapper, Orders> impleme
         if (customer != null && customer.getDiscountRate() != null) {
             customerDiscountRate = customer.getDiscountRate();
         }
-        // 客户尊享价 = 商品原价总和 × 客户折扣率
-        BigDecimal discountedAmount = sumOfItems.multiply(customerDiscountRate);
+        // 客户尊享价（最终实收）= 商品原价总和 × 客户折扣率
+        BigDecimal finalPayAmount = sumOfItems.multiply(customerDiscountRate);
 
-        // 3. 计算最终实收金额
-        BigDecimal discount = BigDecimal.valueOf(vo.getDiscountAmount() != null ? vo.getDiscountAmount() : 0.0);
-        // 最终实收金额 = 客户尊享价 - 手动优惠金额
-        BigDecimal finalPayAmount = discountedAmount.subtract(discount);
+        // 3. 减免金额 = 商品原价总和 - 最终实收金额
+        BigDecimal totalDiscount = sumOfItems.subtract(finalPayAmount);
 
         // 4. 保存订单主表
         Orders orders = new Orders();
         orders.setCustomerId(vo.getCustomerId());
         orders.setUserId(vo.getUserId());
-        orders.setTotalAmount(finalPayAmount); // 存入扣除折扣后的【实收金额】
-        orders.setDiscountAmount(discount);    // 【折扣金额】也存进去
+        orders.setTotalAmount(finalPayAmount); // 实收金额
+        orders.setDiscountAmount(totalDiscount); // 减免金额
         orders.setStatus(vo.getStatus());
         this.save(orders);
 

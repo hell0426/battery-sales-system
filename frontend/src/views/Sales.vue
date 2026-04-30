@@ -96,7 +96,7 @@
           </el-table>
 
           <div class="checkout-area">
-            <!-- 三行金额展示：原价 → 尊享价 → 最终应收 -->
+            <!-- 四行金额展示：原价 → 尊享价 → 优惠金额 → 最终应收 -->
             <div class="total-price" style="font-size: 14px; color: #999">
               商品原价：<span>¥{{ totalAmount }}</span>
             </div>
@@ -267,7 +267,6 @@ const handleSubmit = () => {
   const data = {
     customerId: customerId.value,
     userId: sessionStorage.getItem("userId"),
-    discountAmount: 0,
     status: payStatus.value,
     items: cartList.value.map((item) => ({
       productId: item.id,
