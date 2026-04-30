@@ -96,17 +96,15 @@
           </el-select>
         </el-form-item>
         <el-form-item label="折扣率">
-          <el-input-number
-            v-model="form.discountRate"
-            :step="0.05"
-            :min="0.1"
-            :max="1.0"
-            :precision="2"
-            style="width: 100%"
-          />
-          <div style="color: #909399; font-size: 12px; line-height: 1.5">
-            1.00 代表原价，0.85 代表 85 折
-          </div>
+          <el-select v-model="form.discountRate" placeholder="请选择折扣" style="width: 100%">
+            <el-option label="10折 (原价)" :value="1.00" />
+            <el-option label="9.5折" :value="0.95" />
+            <el-option label="9折" :value="0.90" />
+            <el-option label="8.5折" :value="0.85" />
+            <el-option label="8折" :value="0.80" />
+            <el-option label="7.5折" :value="0.75" />
+            <el-option label="7折" :value="0.70" />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
