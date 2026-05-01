@@ -3,15 +3,14 @@ package com.zjgs.backend;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
-import org.junit.jupiter.api.Test;
-
 import java.util.Collections;
 
-
+/**
+ * 代码生成器工具（非测试用例，手动运行 main 方法即可）
+ */
 public class CodeGenerator{
 
-    @Test
-    public void codeGenerator() {
+    public static void main(String[] args) {
         // 1. 数据库连接配置
         String url = "jdbc:mysql://localhost:3306/battery_sales?serverTimezone=GMT%2B8&useUnicode=true&characterEncoding=utf-8&useSSL=false";
         String username = "root";
