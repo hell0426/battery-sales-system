@@ -165,28 +165,55 @@
 </template>
 
 <script setup>
+/**
+ * Sales.vue —— 开单销售页面
+ *
+ * 核心流程：
+ * 1. 选择商品 → 加入购物车（纯前端操作，不请求后端）
+ * 2. 选择客户 → watch 自动读取客户折扣率 → computed 实时计算优惠价格
+ * 3. 选择支付方式（paid 现结 / debt 挂账）
+ * 4. 点击提交 → handleSubmit 打包数据 → submitOrder API → 后端 createOrder 事务处理
+ *
+ * 价格实时计算机制（纯前端，不调后端）：
+ *   - cartList 变化 → totalAmount computed 自动重算
+ *   - customerId 变化 → customerDiscountRate watch 自动更新
+ *   - 任一变化 → 模板里的 {{ totalAmount * customerDiscountRate }} 自动刷新显示
+ */
 import { ref, computed, onMounted, watch } from "vue";
 import { getProductList } from "@/api/product";
 import { getCustomerList } from "@/api/customer";
 import { submitOrder } from "@/api/orders";
 import { ElMessage } from "element-plus";
 
-const productList = ref([]);
-const customerList = ref([]);
-const cartList = ref([]);
-const searchText = ref("");
-const customerId = ref(null);
-const payStatus = ref("paid");
-const submitting = ref(false);
-const activeBrand = ref("");
-// 客户折扣率（选择客户时自动获取）
+// ---- 响应式状态变量 ----
+const productList = ref([]);       // 商品列表（从后端加载）
+const customerList = ref([]);      // 客户列表（从后端加载）
+const cartList = ref([]);          // 购物车（纯前端内存，加商品时 push）
+const searchText = ref("");        // 搜索关键字
+const customerId = ref(null);      // 当前选中的客户 ID
+const payStatus = ref("paid");     // 支付方式：paid（现结）或 debt（挂账）
+const submitting = ref(false);     // 提交中状态（防止重复点击）
+const activeBrand = ref("");       // 当前激活的品牌 Tab
+
+/**
+ * 客户折扣率 —— 默认 1.0 (无折扣)
+ * 选择客户时由 watch 自动从 customerList 中提取
+ */
 const customerDiscountRate = ref(1);
 
-// 分组逻辑改为识别 brandName 和 modelName
+// ==================== computed 计算属性 ====================
+// computed 的核心作用：依赖的数据变了，它自动重算，无需手动刷新
+// 类比 Excel 公式单元格 —— 改一个格子，所有关联公式自动更新
+
+/**
+ * 按品牌分组后的商品列表
+ * 依赖：productList（商品数据）和 searchText（搜索关键字）
+ * 任一变化 → 自动重新分组
+ */
 const groupedProducts = computed(() => {
   const groups = {};
   productList.value.forEach((p) => {
-    // 搜索逻辑适配新的 modelName 字段
+    // 搜索过滤：型号名包含关键字才显示
     if (
       searchText.value &&
       !p.modelName?.toLowerCase().includes(searchText.value.toLowerCase())
@@ -202,43 +229,72 @@ const groupedProducts = computed(() => {
   return groups;
 });
 
+// 当商品分组变化时，默认激活第一个品牌 Tab
 watch(groupedProducts, (newVal) => {
   if (!activeBrand.value && Object.keys(newVal).length > 0) {
     activeBrand.value = Object.keys(newVal)[0];
   }
 });
 
-// 选择客户时，自动获取该客户的折扣率
+/**
+ * 监听客户选择变化 → 自动提取该客户的折扣率
+ *
+ * 流程：用户下拉选择客户"老张"
+ *   → watch 触发
+ *   → 从 customerList 中找到老张的 discountRate = 0.9
+ *   → customerDiscountRate 变为 0.9
+ *   → 所有依赖它的 computed 自动重算 → 页面价格自动刷新
+ */
 watch(customerId, (newVal) => {
   if (newVal) {
     const customer = customerList.value.find((c) => c.id === newVal);
     customerDiscountRate.value = customer?.discountRate || 1;
   } else {
-    customerDiscountRate.value = 1;
+    customerDiscountRate.value = 1; // 清空客户时恢复原价
   }
 });
 
+/**
+ * 购物车商品原价总和
+ * 依赖：cartList（每次添加/删除商品自动重算）
+ */
 const totalAmount = computed(() => {
   return cartList.value.reduce((sum, item) => sum + item.quantity * item.sellingPrice, 0);
 });
 
+/**
+ * 优惠减免金额 = 原价 × (1 - 折扣率)
+ * 依赖：totalAmount（原价变了）和 customerDiscountRate（折扣变了）
+ * 任一变 → 自动重算
+ */
 const discountAmount = computed(() => {
   return totalAmount.value * (1 - customerDiscountRate.value);
 });
 
+/**
+ * 加载商品列表
+ * 调用 getProductList API → axios GET/POST → Vite 代理转发 → ProductController → MyBatis-Plus 联表查询
+ * 返回的 JSON 经过 axios 自动 JSON.parse() 变成 JS 对象，存入 productList
+ */
 const loadProducts = () => {
-  // 这里的接口会触发 ProductController 的联表查询
   getProductList({ page: 1, size: 500 }).then((res) => {
-    productList.value = res.data.list;
+    productList.value = res.data.list; // res 已经是 JS 对象，可 .data.list 访问
   });
 };
 
+/**
+ * 加载客户列表（含 discount_rate 折扣率字段）
+ */
 const loadCustomers = () => {
   getCustomerList({ page: 1, size: 500 }).then((res) => {
     customerList.value = res.data.list;
   });
 };
 
+/**
+ * 将商品加入购物车（纯前端操作，不调后端）
+ * @param {Object} product - 点击的商品对象
+ */
 const addToCart = (product) => {
   if (product.stock <= 0) return ElMessage.warning("该型号暂时缺货");
   const existItem = cartList.value.find((item) => item.id === product.id);
@@ -246,43 +302,65 @@ const addToCart = (product) => {
     if (existItem.quantity < product.stock) existItem.quantity++;
     else ElMessage.warning("超过库存上限");
   } else {
-    // 存入购物车的字段名也要更新
     cartList.value.push({
       id: product.id,
       brandName: product.brandName,
       modelName: product.modelName,
       sellingPrice: product.sellingPrice,
       quantity: 1,
-      maxStock: product.stock,
+      maxStock: product.stock, // 记录库存上限，用于前端校验
     });
   }
 };
 
 const removeFromCart = (index) => cartList.value.splice(index, 1);
 
+/**
+ * 提交开单 —— 从前端到后端的完整调用链入口
+ *
+ * 完整链路：
+ * 1. 前端校验（购物车非空、已选客户）
+ * 2. 组装 OrderSubmitVo 数据（customerId, userId, status, items）
+ * 3. 调用 submitOrder(data) → api/orders.js → axios POST /api/orders/submit
+ * 4. Vite 代理转发到 localhost:8080/orders/submit
+ * 5. OrdersController.submitOrder() 接收 → ordersService.createOrder(vo)
+ * 6. 后端事务：校验库存 → 扣库存 → 算折扣 → INSERT orders → INSERT order_item
+ * 7. 成功：清空购物车、重置折扣率、刷新库存
+ * 8. 失败：后端抛异常（库存不足等），axios 响应拦截器弹错误提示
+ */
 const handleSubmit = () => {
+  // 前端表单校验（提升用户体验，后端还有更严谨的校验）
   if (cartList.value.length === 0) return ElMessage.warning("请先选择商品");
   if (!customerId.value) return ElMessage.warning("请选择客户");
-  submitting.value = true;
+
+  submitting.value = true; // 按钮显示 loading 转圈，防止重复提交
+
+  // 组装提交数据（对应后端 OrderSubmitVo）
   const data = {
-    customerId: customerId.value,
-    userId: sessionStorage.getItem("userId"),
-    status: payStatus.value,
-    items: cartList.value.map((item) => ({
+    customerId: customerId.value,                       // 客户 ID
+    userId: sessionStorage.getItem("userId"),            // 当前登录员工 ID
+    status: payStatus.value,                            // paid（现结）或 debt（挂账）
+    items: cartList.value.map((item) => ({              // 购物车商品列表
       productId: item.id,
       quantity: item.quantity,
       price: item.sellingPrice,
     })),
   };
+
+  /**
+   * submitOrder(data) 返回 Promise
+   * .then() —— 后端返回 RespBean(code=200) 时触发
+   * .catch() —— 后端异常 / 网络错误时触发
+   */
   submitOrder(data)
     .then(() => {
       ElMessage.success("开单成功！");
-      cartList.value = [];
-      customerDiscountRate.value = 1; // 重置客户折扣率
-      loadProducts();
+      cartList.value = [];                // 清空购物车
+      customerDiscountRate.value = 1;     // 重置折扣率为 1（无折扣）
+      loadProducts();                     // 重新加载商品列表（刷新库存显示）
       submitting.value = false;
     })
-    .catch(() => (submitting.value = false));
+    .catch(() => (submitting.value = false)); // 失败时也要恢复按钮状态
 };
 
 onMounted(() => {
