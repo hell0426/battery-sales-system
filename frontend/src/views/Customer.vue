@@ -4,10 +4,10 @@
     <el-card class="search-card">
       <el-form :inline="true" :model="queryForm">
         <el-form-item label="客户名称">
-          <el-input v-model="queryForm.name" placeholder="搜姓名/修车厂" clearable />
+          <el-input v-model="queryForm.name" placeholder="搜姓名/修车厂" clearable style="width: 220px" />
         </el-form-item>
         <el-form-item label="联系电话">
-          <el-input v-model="queryForm.phone" placeholder="搜电话" clearable />
+          <el-input v-model="queryForm.phone" placeholder="搜电话" clearable style="width: 220px" />
         </el-form-item>
         <el-form-item>
           <el-button type="primary" icon="Search" @click="loadData">查询</el-button>

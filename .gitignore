@@ -12,6 +12,18 @@ frontend/dist/
 frontend/.vscode/
 frontend/*.log
 
+# --- IDE 配置（所有层级） ---
+**/.idea/
+**/*.iml
+.vscode/
+
+# --- Claude Code 本地配置 ---
+.claude/
+.claudeignore
+
+# --- Spring Initializr 附带的无用文件 ---
+backend/HELP.md
+
 # --- 系统忽略项 ---
 .DS_Store
 Thumbs.db
